@@ -1,10 +1,10 @@
 import React from 'react';
-import SkirtAnimation from './components/SkirtAnimation';
+import Scene from './components/Scene';
 
 function App() {
   return (
     <div className="app">
-      <SkirtAnimation />
+      <Scene />
     </div>
   );
 }
