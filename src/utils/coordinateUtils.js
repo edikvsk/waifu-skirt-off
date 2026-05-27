@@ -1,0 +1,98 @@
+// Утилиты для работы с координатами относительно игрового контейнера
+
+const GAME_CONTAINER_WIDTH = 1920;
+const GAME_CONTAINER_HEIGHT = 1080;
+
+/**
+ * Преобразует координаты из viewport в координаты относительно игрового контейнера
+ * @param {number} viewportX - Координата X относительно viewport
+ * @param {number} viewportY - Координата Y относительно viewport
+ * @param {number} scale - Текущий масштаб игрового контейнера
+ * @param {HTMLElement} gameContainer - Элемент игрового контейнера
+ * @returns {{x: number, y: number}} Координаты относительно игрового контейнера
+ */
+export function viewportToGameCoordinates(viewportX, viewportY, scale, gameContainer) {
+  if (!gameContainer) {
+    return { x: viewportX, y: viewportY };
+  }
+
+  const rect = gameContainer.getBoundingClientRect();
+  
+  // Вычисляем позицию относительно центра контейнера
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  
+  // Преобразуем с учётом масштаба
+  const gameX = (viewportX - centerX) / scale + GAME_CONTAINER_WIDTH / 2;
+  const gameY = (viewportY - centerY) / scale + GAME_CONTAINER_HEIGHT / 2;
+  
+  return { x: gameX, y: gameY };
+}
+
+/**
+ * Преобразует координаты из игрового контейнера в viewport координаты
+ * @param {number} gameX - Координата X относительно игрового контейнера
+ * @param {number} gameY - Координата Y относительно игрового контейнера
+ * @param {number} scale - Текущий масштаб игрового контейнера
+ * @param {HTMLElement} gameContainer - Элемент игрового контейнера
+ * @returns {{x: number, y: number}} Координаты относительно viewport
+ */
+export function gameToViewportCoordinates(gameX, gameY, scale, gameContainer) {
+  if (!gameContainer) {
+    return { x: gameX, y: gameY };
+  }
+
+  const rect = gameContainer.getBoundingClientRect();
+  
+  // Вычисляем центр контейнера
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  
+  // Преобразуем с учётом масштаба
+  const viewportX = (gameX - GAME_CONTAINER_WIDTH / 2) * scale + centerX;
+  const viewportY = (gameY - GAME_CONTAINER_HEIGHT / 2) * scale + centerY;
+  
+  return { x: viewportX, y: viewportY };
+}
+
+/**
+ * Вычисляет расстояние между двумя точками
+ * @param {number} x1 - Координата X первой точки
+ * @param {number} y1 - Координата Y первой точки
+ * @param {number} x2 - Координата X второй точки
+ * @param {number} y2 - Координата Y второй точки
+ * @returns {number} Расстояние между точками
+ */
+export function calculateDistance(x1, y1, x2, y2) {
+  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+}
+
+/**
+ * Проверяет коллизию между двумя кругами
+ * @param {Object} circle1 - Первый круг {x, y, radius}
+ * @param {Object} circle2 - Второй круг {x, y, radius}
+ * @returns {boolean} True если есть коллизия
+ */
+export function checkCircleCollision(circle1, circle2) {
+  const distance = calculateDistance(circle1.x, circle1.y, circle2.x, circle2.y);
+  return distance < (circle1.radius + circle2.radius);
+}
+
+/**
+ * Получает точную позицию элемента относительно игрового контейнера
+ * @param {HTMLElement} element - Элемент
+ * @param {number} scale - Текущий масштаб
+ * @param {HTMLElement} gameContainer - Игровой контейнер
+ * @returns {{x: number, y: number}} Позиция центра элемента
+ */
+export function getElementGamePosition(element, scale, gameContainer) {
+  if (!element) {
+    return { x: 0, y: 0 };
+  }
+
+  const rect = element.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  
+  return viewportToGameCoordinates(centerX, centerY, scale, gameContainer);
+}

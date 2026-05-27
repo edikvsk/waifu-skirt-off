@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { gsap } from 'gsap';
+import { collisionConfig } from '../config/collisionConfig';
 
 export const useBallAnimation = (speedValue, setSpeedPaused) => {
   const ballRef = useRef(null);
@@ -48,17 +49,26 @@ export const useBallAnimation = (speedValue, setSpeedPaused) => {
 
   const reverseBall = () => {
     if (!ballRef.current || !animationRef.current) return;
-    
-    // Останавливаем текущую анимацию
-    animationRef.current.kill();
-    
-    // Запускаем анимацию в обратном направлении
+
+    // Полностью останавливаем все анимации шара
+    gsap.killTweensOf(ballRef.current);
+    animationRef.current = null;
+
+    // Получаем текущие GSAP свойства
+    const currentX = gsap.getProperty(ballRef.current, 'x');
+    const currentY = gsap.getProperty(ballRef.current, 'y');
+
+    // Мгновенно фиксируем текущую позицию
+    gsap.set(ballRef.current, { x: currentX, y: currentY });
+
+    // Запускаем анимацию в обратном направлении с параметрами из конфигурации
     const duration = 3 - (speedValue / 100) * 2.5;
-    
+
     animationRef.current = gsap.to(ballRef.current, {
       x: '-2000px',
-      duration: duration * 0.8,
-      ease: 'power1.inOut',
+      y: currentY,
+      duration: duration * collisionConfig.rebound.speedMultiplier,
+      ease: collisionConfig.rebound.ease,
       onUpdate: function() {
         if (ballRef.current) {
           const rect = ballRef.current.getBoundingClientRect();

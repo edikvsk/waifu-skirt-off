@@ -1,5 +1,6 @@
 import React, { useRef, useImperativeHandle, forwardRef, useState } from 'react';
 import { gsap } from 'gsap';
+import { collisionConfig } from '../config/collisionConfig';
 
 const BaseballPlayer = forwardRef(({ sceneRotation }, ref) => {
   const batRef = useRef(null);
@@ -17,12 +18,12 @@ const BaseballPlayer = forwardRef(({ sceneRotation }, ref) => {
     const tl = gsap.timeline();
 
     // Исходная позиция
-    gsap.set(batRef.current, { rotation: 45 });
+    gsap.set(batRef.current, { rotation: -45 });
 
     // Взмах назад
     tl.to(batRef.current, {
-      rotation: 90,
-      duration: 0.2,
+      rotation: -90,
+      duration: collisionConfig.swing.duration.back,
       ease: 'power2.in',
       onUpdate: () => {
         updateBatPosition();
@@ -31,28 +32,28 @@ const BaseballPlayer = forwardRef(({ sceneRotation }, ref) => {
 
     // Быстрый взмах вперёд
     tl.to(batRef.current, {
-      rotation: -90,
-      duration: 0.15,
+      rotation: 90,
+      duration: collisionConfig.swing.duration.forward,
       ease: 'power4.out',
       onUpdate: () => {
         updateBatPosition();
       }
-    }, 0.2);
+    }, collisionConfig.swing.duration.back);
 
     // Возврат в исходную позицию
     tl.to(batRef.current, {
-      rotation: 45,
-      duration: 0.3,
+      rotation: -45,
+      duration: collisionConfig.swing.duration.return,
       ease: 'power2.out',
       onUpdate: () => {
         updateBatPosition();
       }
-    }, 0.35);
+    }, collisionConfig.swing.duration.back + collisionConfig.swing.duration.forward);
 
     // Возвращаемся к idle спрайту после завершения анимации
     tl.call(() => {
       setIsHitting(false);
-    }, null, 0.5);
+    }, null, collisionConfig.swing.duration.back + collisionConfig.swing.duration.forward + collisionConfig.swing.duration.return);
   };
 
   const updateBatPosition = () => {
@@ -133,14 +134,14 @@ const BaseballPlayer = forwardRef(({ sceneRotation }, ref) => {
           ref={batRef}
           style={{
             position: 'absolute',
-            top: '60px',
-            left: '-30px',
+            top: '900px',
+            left: '650px',
             width: '12px',
             height: '120px',
             background: 'linear-gradient(90deg, #8b4513 0%, #a0522d 50%, #8b4513 100%)',
             borderRadius: '6px',
             transformOrigin: 'top center',
-            transform: 'rotate(45deg)',
+            transform: 'rotate(-45deg)',
             boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
             opacity: 0
           }}
