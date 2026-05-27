@@ -28,8 +28,8 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  width: 100%;
-  height: 100vh;
+  width: 1920px;
+  height: 1080px;
   position: relative;
   transform-style: preserve-3d;
 }
@@ -39,8 +39,8 @@ body {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%) rotateX(60deg);
-  width: 200vw;
-  height: 100vh;
+  width: 3840px;
+  height: 1080px;
   background: linear-gradient(180deg, 
     rgba(30, 30, 50, 0.9) 0%, 
     rgba(20, 20, 40, 0.95) 50%,

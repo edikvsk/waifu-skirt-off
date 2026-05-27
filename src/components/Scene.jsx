@@ -12,6 +12,7 @@ const Scene = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [windLevel, setWindLevel] = useState(1);
+  const [scale, setScale] = useState(1);
   
   // Custom hooks
   const { rotation, containerRef } = useSceneRotation();
@@ -21,6 +22,31 @@ const Scene = () => {
   // Ref for baseball player swing function
   const baseballPlayerRef = useRef(null);
   const isSwingingRef = useRef(false);
+  const gameContainerRef = useRef(null);
+
+  // Масштабирование игрового контейнера как в играх
+  useEffect(() => {
+    const updateScale = () => {
+      if (!gameContainerRef.current) return;
+      
+      const baseWidth = 1920;
+      const baseHeight = 1080;
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      
+      const scaleX = windowWidth / baseWidth;
+      const scaleY = windowHeight / baseHeight;
+      
+      // Используем меньший масштаб для сохранения пропорций
+      const newScale = Math.min(scaleX, scaleY);
+      setScale(newScale);
+    };
+
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
 
   useEffect(() => {
     const girlImg = new Image();
@@ -64,7 +90,7 @@ const Scene = () => {
     );
     
     // Если расстояние меньше 100px и шар находится в зоне биты - отскок
-    if (distance < 100 && ballPos.x > window.innerWidth * 0.4 && ballPos.x < window.innerWidth * 0.8) {
+    if (distance < 100 && ballPos.x > 768 && ballPos.x < 1536) {
       reverseBall();
       isSwingingRef.current = false; // Предотвращаем множественные отскоки
     }
@@ -93,33 +119,50 @@ const Scene = () => {
         onSwingBat={swingBat}
       />
       
-      {/* 3D сцена */}
+      {/* Игровой контейнер с фиксированным размером */}
       <div 
-        ref={containerRef}
-        className="skirt-animation-container"
+        ref={gameContainerRef}
         style={{
-          transform: `rotateX(${-rotation.x}deg) rotateY(${rotation.y}deg)`,
-          transition: 'transform 0.1s ease-out'
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: `translate(-50%, -50%) scale(${scale})`,
+          width: '1920px',
+          height: '1080px',
+          transformOrigin: 'center center',
+          overflow: 'hidden'
         }}
       >
-        {/* 3D окружение (пол) */}
-        <Environment3D />
-        
-        {/* Персонаж с дочерними элементами */}
-        <Character
-          imageLoaded={imageLoaded}
-          isAnimating={isAnimating}
-          windLevel={windLevel}
-          sceneRotation={rotation}
+        {/* 3D сцена */}
+        <div 
+          ref={containerRef}
+          className="skirt-animation-container"
+          style={{
+            transform: `rotateX(${-rotation.x}deg) rotateY(${rotation.y}deg)`,
+            transition: 'transform 0.1s ease-out',
+            width: '100%',
+            height: '100%'
+          }}
         >
-          <Ball ref={ballRef} />
-        </Character>
-        
-        {/* Бейсболист справа */}
-        <BaseballPlayer 
-          ref={baseballPlayerRef}
-          sceneRotation={rotation}
-        />
+          {/* 3D окружение (пол) */}
+          <Environment3D />
+          
+          {/* Персонаж с дочерними элементами */}
+          <Character
+            imageLoaded={imageLoaded}
+            isAnimating={isAnimating}
+            windLevel={windLevel}
+            sceneRotation={rotation}
+          >
+            <Ball ref={ballRef} />
+          </Character>
+          
+          {/* Бейсболист справа */}
+          <BaseballPlayer 
+            ref={baseballPlayerRef}
+            sceneRotation={rotation}
+          />
+        </div>
       </div>
     </>
   );

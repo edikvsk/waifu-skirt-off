@@ -6,7 +6,7 @@ const Ball = forwardRef((props, ref) => {
       ref={ref}
       style={{
         position: 'absolute',
-        top: '60%',
+        top: '650px',
         left: '0',
         width: '30px',
         height: '30px',

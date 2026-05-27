@@ -1,13 +1,17 @@
-import React, { useRef, useImperativeHandle, forwardRef } from 'react';
+import React, { useRef, useImperativeHandle, forwardRef, useState } from 'react';
 import { gsap } from 'gsap';
 
 const BaseballPlayer = forwardRef(({ sceneRotation }, ref) => {
   const batRef = useRef(null);
   const playerRef = useRef(null);
   const batPosition = useRef({ x: 0, y: 0, angle: 0 });
+  const [isHitting, setIsHitting] = useState(false);
 
   const swingBat = () => {
     if (!batRef.current) return;
+
+    // Переключаем на hit спрайт
+    setIsHitting(true);
 
     // Анимация взмаха битой
     const tl = gsap.timeline();
@@ -44,6 +48,11 @@ const BaseballPlayer = forwardRef(({ sceneRotation }, ref) => {
         updateBatPosition();
       }
     }, 0.35);
+
+    // Возвращаемся к idle спрайту после завершения анимации
+    tl.call(() => {
+      setIsHitting(false);
+    }, null, 0.5);
   };
 
   const updateBatPosition = () => {
@@ -76,8 +85,8 @@ const BaseballPlayer = forwardRef(({ sceneRotation }, ref) => {
       ref={playerRef}
       style={{
         position: 'absolute',
-        right: '10%',
-        bottom: '220px',
+        right: '-100px',
+        bottom: '0',
         transformStyle: 'preserve-3d',
         transition: 'transform 0.1s ease-out',
         display: 'flex',
@@ -89,60 +98,37 @@ const BaseballPlayer = forwardRef(({ sceneRotation }, ref) => {
       <div style={{
         position: 'absolute',
         bottom: '-20px',
-        left: '50%',
+        left: '450px',
         transform: 'translateX(-50%) rotateX(60deg)',
-        width: '120px',
-        height: '30px',
+        width: '150px',
+        height: '40px',
         background: 'radial-gradient(ellipse, rgba(0, 0, 0, 0.4) 0%, transparent 70%)',
         filter: 'blur(8px)',
         zIndex: 0
       }} />
       
-      {/* Бейсболист (простая SVG фигура) */}
+      {/* Бейсболист (спрайты) */}
       <div style={{
         position: 'relative',
-        width: '80px',
-        height: '200px',
+        width: '770px',
+        height: '1050px',
         zIndex: 1,
         filter: 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
       }}>
-        {/* Тело */}
-        <div style={{
-          position: 'absolute',
-          bottom: '0',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '60px',
-          height: '140px',
-          background: 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)',
-          borderRadius: '10px 10px 5px 5px'
-        }} />
+        <img 
+          src={isHitting ? '/batter_hit_low.png' : '/batter_idle.png'}
+          alt="Baseball Player"
+          style={{
+            width: '1000px',
+            height: '1200px',
+            objectFit: 'contain',
+            position: 'absolute',
+            top: '0',
+            left: '0'
+          }}
+        />
         
-        {/* Голова */}
-        <div style={{
-          position: 'absolute',
-          top: '0',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '50px',
-          height: '50px',
-          background: 'linear-gradient(135deg, #f5cba7 0%, #e8b88a 100%)',
-          borderRadius: '50%'
-        }} />
-        
-        {/* Кепка */}
-        <div style={{
-          position: 'absolute',
-          top: '-10px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '55px',
-          height: '25px',
-          background: 'linear-gradient(135deg, #2c3e50 0%, #1a252f 100%)',
-          borderRadius: '10px 10px 0 0'
-        }} />
-        
-        {/* Бита */}
+        {/* Бита (скрыта, так как она уже есть на спрайтах) */}
         <div 
           ref={batRef}
           style={{
@@ -155,7 +141,8 @@ const BaseballPlayer = forwardRef(({ sceneRotation }, ref) => {
             borderRadius: '6px',
             transformOrigin: 'top center',
             transform: 'rotate(45deg)',
-            boxShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+            boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+            opacity: 0
           }}
         />
       </div>

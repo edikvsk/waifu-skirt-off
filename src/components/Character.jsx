@@ -127,7 +127,7 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
       style={{ 
         position: 'relative', 
         display: 'inline-block', 
-        marginBottom: '80px',
+        marginBottom: '250px',
         transformStyle: 'preserve-3d',
         transition: 'transform 0.1s ease-out'
       }}
@@ -146,7 +146,7 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
         style={{ 
           position: 'relative',
           zIndex: 1,
-          maxHeight: '75vh',
+          maxHeight: '550px',
           width: 'auto',
           display: 'block',
           filter: 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
@@ -164,7 +164,7 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
           top: '37%',
           left: '47%',
           transform: 'translateX(-50%) scaleX(1.05)',
-          maxHeight: '18vh',
+          maxHeight: '132px',
           width: 'auto',
           zIndex: 2,
           transformOrigin: 'top center',

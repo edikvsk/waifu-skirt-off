@@ -18,11 +18,11 @@ export const useBallAnimation = (speedValue, setSpeedPaused) => {
     const duration = 3 - (speedValue / 100) * 2.5;
     
     // Сбрасываем позицию шара влево
-    gsap.set(ballRef.current, { x: '-100vw', opacity: 1 });
+    gsap.set(ballRef.current, { x: '-2000px', opacity: 1 });
     
     // Анимация полёта шара слева направо с отслеживанием позиции
     animationRef.current = gsap.to(ballRef.current, {
-      x: '100vw',
+      x: '2000px',
       duration: duration,
       ease: 'power1.inOut',
       onUpdate: function() {
@@ -56,7 +56,7 @@ export const useBallAnimation = (speedValue, setSpeedPaused) => {
     const duration = 3 - (speedValue / 100) * 2.5;
     
     animationRef.current = gsap.to(ballRef.current, {
-      x: '-100vw',
+      x: '-2000px',
       duration: duration * 0.8,
       ease: 'power1.inOut',
       onUpdate: function() {
