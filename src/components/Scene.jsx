@@ -4,6 +4,8 @@ import { useSpeedMeter } from '../hooks/useSpeedMeter';
 import { useBallAnimation } from '../hooks/useBallAnimation';
 import UIControls from './ui/UIControls';
 import Countdown from './ui/Countdown';
+import StarsRating from './ui/StarsRating';
+import HitEffect from './ui/HitEffect';
 import Environment3D from './Environment3D';
 import Character from './Character';
 import Ball from './Ball';
@@ -22,6 +24,9 @@ const Scene = () => {
   const [debugBallPos, setDebugBallPos] = useState({ x: 0, y: 0 });
   const [isCountdownActive, setIsCountdownActive] = useState(false);
   const [fixedSpeedValue, setFixedSpeedValue] = useState(null);
+  const [starsCount, setStarsCount] = useState(null);
+  const [hitEffectActive, setHitEffectActive] = useState(false);
+  const [hitPosition, setHitPosition] = useState(null);
 
   // Параметры невидимой биты (для отладки)
   const [batLength, setBatLength] = useState(collisionConfig.batVisual.length);
@@ -102,6 +107,27 @@ const Scene = () => {
     }
   }, [ballAnimating, fixedSpeedValue]);
 
+  // Скрываем звёзды через 2 секунды после отображения
+  useEffect(() => {
+    if (starsCount !== null) {
+      const timer = setTimeout(() => {
+        setStarsCount(null);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [starsCount]);
+
+  // Скрываем эффект удара через 0.4 секунды
+  useEffect(() => {
+    if (hitEffectActive) {
+      const timer = setTimeout(() => {
+        setHitEffectActive(false);
+        setHitPosition(null);
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+  }, [hitEffectActive]);
+
   const saveBatConfig = () => {
     const config = {
       batVisual: {
@@ -158,14 +184,30 @@ const Scene = () => {
 
     if (hasCollision) {
       console.log('КОЛЛИЗИЯ! Шар отбит битой');
-      
+
+      // Активируем эффект удара
+      setHitPosition({ x: ballPos.x, y: ballPos.y });
+      setHitEffectActive(true);
+
       // Определяем уровень ветра на основе скорости шара
       const newWindLevel = getWindLevelFromSpeed(speedValue);
       setWindLevel(newWindLevel);
       setIsAnimating(true); // Включаем анимацию юбки
-      
-      console.log(`Скорость шара: ${speedValue}, Уровень ветра: ${newWindLevel}`);
-      
+
+      // Определяем количество звёзд на основе скорости
+      const { speedLevels } = collisionConfig;
+      let newStarsCount = 0;
+      if (speedValue >= speedLevels.high.min && speedValue <= speedLevels.high.max) {
+        newStarsCount = 3; // Высокая скорость - 3 звезды
+      } else if (speedValue >= speedLevels.normal.min && speedValue <= speedLevels.normal.max) {
+        newStarsCount = 2; // Обычная скорость - 2 звезды
+      } else {
+        newStarsCount = 1; // Низкая скорость - 1 звезда
+      }
+      setStarsCount(newStarsCount);
+
+      console.log(`Скорость шара: ${speedValue}, Уровень ветра: ${newWindLevel}, Звёзды: ${newStarsCount}`);
+
       reverseBall();
       isSwingingRef.current = false; // Предотвращаем множественные отскоки
     }
@@ -215,6 +257,12 @@ const Scene = () => {
         isActive={isCountdownActive}
         onComplete={handleCountdownComplete}
       />
+
+      {/* Рейтинг звёзд */}
+      <StarsRating filledCount={starsCount} />
+
+      {/* Эффект удара */}
+      <HitEffect isActive={hitEffectActive} position={hitPosition} />
 
       {/* Кнопка отладочного режима */}
       <button
