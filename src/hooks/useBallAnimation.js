@@ -18,6 +18,12 @@ export const useBallAnimation = (speedValue, setSpeedPaused) => {
     // Скорость 0 = 3 секунды, скорость 100 = 0.5 секунды
     const duration = 3 - (speedValue / 100) * 2.5;
     
+    // Случайное количество волн (2, 3 или 4)
+    const waveCount = Math.floor(Math.random() * 3) + 2;
+    
+    // Зеркальное отражение для 4 волн
+    const isInverted = waveCount === 4;
+    
     // Сбрасываем позицию шара влево
     gsap.set(ballRef.current, { x: '-2000px', opacity: 1 });
     
@@ -29,8 +35,8 @@ export const useBallAnimation = (speedValue, setSpeedPaused) => {
       onUpdate: function() {
         if (ballRef.current) {
           const progress = this.progress();
-          // Синусоидальное движение по Y (амплитуда 150px, 3 волны)
-          const yOffset = Math.sin(progress * Math.PI * 3) * 150;
+          // Синусоидальное движение по Y (амплитуда 150px, случайное количество волн)
+          const yOffset = Math.sin(progress * Math.PI * waveCount) * 150 * (isInverted ? -1 : 1);
           gsap.set(ballRef.current, { y: yOffset });
           
           const rect = ballRef.current.getBoundingClientRect();

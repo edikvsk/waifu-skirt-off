@@ -93,6 +93,39 @@ export function getElementGamePosition(element, scale, gameContainer) {
   const rect = element.getBoundingClientRect();
   const centerX = rect.left + rect.width / 2;
   const centerY = rect.top + rect.height / 2;
-  
+
   return viewportToGameCoordinates(centerX, centerY, scale, gameContainer);
 }
+
+/**
+ * Проверяет коллизию между прямоугольником (с вращением) и кругом
+ * @param {Object} rect - Прямоугольник {x, y, width, height, angle (rad)}
+ * @param {Object} circle - Круг {x, y, radius}
+ * @returns {boolean} True если есть коллизия
+ */
+export function checkRotatedRectCircleCollision(rect, circle) {
+  // Переводим координаты круга в локальную систему прямоугольника
+  const cos = Math.cos(-rect.angle);
+  const sin = Math.sin(-rect.angle);
+
+  // Смещение круга относительно центра прямоугольника
+  const dx = circle.x - rect.x;
+  const dy = circle.y - rect.y;
+
+  // Вращаем координаты круга в локальную систему прямоугольника
+  const localX = dx * cos - dy * sin;
+  const localY = dx * sin + dy * cos;
+
+  // Находим ближайшую точку на прямоугольнике к центру круга
+  const closestX = Math.max(-rect.width / 2, Math.min(rect.width / 2, localX));
+  const closestY = Math.max(-rect.height / 2, Math.min(rect.height / 2, localY));
+
+  // Расстояние от ближайшей точки до центра круга
+  const distanceX = localX - closestX;
+  const distanceY = localY - closestY;
+  const distanceSquared = distanceX * distanceX + distanceY * distanceY;
+
+  // Проверяем, меньше ли расстояние квадрата радиуса
+  return distanceSquared < (circle.radius * circle.radius);
+}
+

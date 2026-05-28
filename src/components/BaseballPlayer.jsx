@@ -2,7 +2,16 @@ import React, { useRef, useImperativeHandle, forwardRef, useState } from 'react'
 import { gsap } from 'gsap';
 import { collisionConfig } from '../config/collisionConfig';
 
-const BaseballPlayer = forwardRef(({ sceneRotation }, ref) => {
+const BaseballPlayer = forwardRef(({
+  sceneRotation,
+  debugMode = false,
+  batLength = collisionConfig.batVisual.length,
+  batWidth = collisionConfig.batVisual.width,
+  batTop = collisionConfig.batVisual.top,
+  batLeft = collisionConfig.batVisual.left,
+  batInitialAngle = collisionConfig.batVisual.initialAngle,
+  batSwingAngle = collisionConfig.batVisual.swingAngle
+}, ref) => {
   const batRef = useRef(null);
   const playerRef = useRef(null);
   const batPosition = useRef({ x: 0, y: 0, angle: 0 });
@@ -18,11 +27,11 @@ const BaseballPlayer = forwardRef(({ sceneRotation }, ref) => {
     const tl = gsap.timeline();
 
     // Исходная позиция
-    gsap.set(batRef.current, { rotation: -45 });
+    gsap.set(batRef.current, { rotation: batInitialAngle });
 
-    // Взмах назад
+    // Взмах назад (фиксированный на 45 градусов назад от начального)
     tl.to(batRef.current, {
-      rotation: -90,
+      rotation: batInitialAngle - 45,
       duration: collisionConfig.swing.duration.back,
       ease: 'power2.in',
       onUpdate: () => {
@@ -30,9 +39,9 @@ const BaseballPlayer = forwardRef(({ sceneRotation }, ref) => {
       }
     }, 0);
 
-    // Быстрый взмах вперёд
+    // Быстрый взмах вперёд (удар)
     tl.to(batRef.current, {
-      rotation: 90,
+      rotation: batSwingAngle,
       duration: collisionConfig.swing.duration.forward,
       ease: 'power4.out',
       onUpdate: () => {
@@ -42,7 +51,7 @@ const BaseballPlayer = forwardRef(({ sceneRotation }, ref) => {
 
     // Возврат в исходную позицию
     tl.to(batRef.current, {
-      rotation: -45,
+      rotation: batInitialAngle,
       duration: collisionConfig.swing.duration.return,
       ease: 'power2.out',
       onUpdate: () => {
@@ -130,20 +139,20 @@ const BaseballPlayer = forwardRef(({ sceneRotation }, ref) => {
         />
         
         {/* Бита (скрыта, так как она уже есть на спрайтах) */}
-        <div 
+        <div
           ref={batRef}
           style={{
             position: 'absolute',
-            top: '900px',
-            left: '650px',
-            width: '12px',
-            height: '120px',
+            top: `${batTop}px`,
+            left: `${batLeft}px`,
+            width: `${batWidth}px`,
+            height: `${batLength}px`,
             background: 'linear-gradient(90deg, #8b4513 0%, #a0522d 50%, #8b4513 100%)',
-            borderRadius: '6px',
+            borderRadius: `${Math.min(batWidth, batLength) / 2}px`,
             transformOrigin: 'top center',
-            transform: 'rotate(-45deg)',
+            transform: `rotate(${batInitialAngle}deg)`,
             boxShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-            opacity: 0
+            opacity: debugMode ? 0.6 : 0
           }}
         />
       </div>

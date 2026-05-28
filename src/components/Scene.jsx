@@ -8,7 +8,7 @@ import Character from './Character';
 import Ball from './Ball';
 import BaseballPlayer from './BaseballPlayer';
 import { collisionConfig } from '../config/collisionConfig';
-import { getElementGamePosition, calculateDistance } from '../utils/coordinateUtils';
+import { getElementGamePosition, calculateDistance, checkRotatedRectCircleCollision } from '../utils/coordinateUtils';
 
 const Scene = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -18,6 +18,15 @@ const Scene = () => {
   const [debugMode, setDebugMode] = useState(false);
   const [debugBatPos, setDebugBatPos] = useState({ x: 0, y: 0 });
   const [debugBallPos, setDebugBallPos] = useState({ x: 0, y: 0 });
+
+  // Параметры невидимой биты (для отладки)
+  const [batLength, setBatLength] = useState(collisionConfig.batVisual.length);
+  const [batWidth, setBatWidth] = useState(collisionConfig.batVisual.width);
+  const [batTop, setBatTop] = useState(collisionConfig.batVisual.top);
+  const [batLeft, setBatLeft] = useState(collisionConfig.batVisual.left);
+  const [batInitialAngle, setBatInitialAngle] = useState(collisionConfig.batVisual.initialAngle);
+  const [batSwingAngle, setBatSwingAngle] = useState(collisionConfig.batVisual.swingAngle);
+  const [savedConfig, setSavedConfig] = useState('');
   
   // Custom hooks
   const { rotation, containerRef } = useSceneRotation();
@@ -70,6 +79,23 @@ const Scene = () => {
     }
   };
 
+  const saveBatConfig = () => {
+    const config = {
+      batVisual: {
+        length: batLength,
+        width: batWidth,
+        top: batTop,
+        left: batLeft,
+        initialAngle: batInitialAngle,
+        swingAngle: batSwingAngle
+      }
+    };
+    const json = JSON.stringify(config, null, 2);
+    setSavedConfig(json);
+    console.log('=== СОХРАНЁННЫЙ КОНФИГ БИТЫ ===');
+    console.log(json);
+  };
+
   const swingBat = () => {
     if (baseballPlayerRef.current && baseballPlayerRef.current.swingBat) {
       baseballPlayerRef.current.swingBat();
@@ -88,15 +114,27 @@ const Scene = () => {
     const batPos = baseballPlayerRef.current.getBatPosition();
     const ballPos = ballPosition.current;
 
-    // Проверка расстояния между шаром и битой с использованием конфигурации
-    const distance = calculateDistance(ballPos.x, ballPos.y, batPos.x, batPos.y);
-    const collisionRadius = collisionConfig.bat.radius;
+    // Прямоугольник биты с учётом вращения
+    const batRect = {
+      x: batPos.x,
+      y: batPos.y,
+      width: batWidth,
+      height: batLength,
+      angle: (batPos.angle * Math.PI) / 180 // конвертируем градусы в радианы
+    };
 
-    console.log('Проверка коллизии - Расстояние:', distance, 'Радиус:', collisionRadius, 'Шар X:', ballPos.x, 'Шар Y:', ballPos.y, 'Бита X:', batPos.x, 'Бита Y:', batPos.y);
+    // Круг шара
+    const ballCircle = {
+      x: ballPos.x,
+      y: ballPos.y,
+      radius: collisionConfig.ball.radius
+    };
 
-    // Если расстояние меньше радиуса коллизии - отскок
-    if (distance < collisionRadius) {
-      console.log('КОЛЛИЗИЯ! Расстояние:', distance);
+    // Проверка коллизии прямоугольник-круг с учётом вращения
+    const hasCollision = checkRotatedRectCircleCollision(batRect, ballCircle);
+
+    if (hasCollision) {
+      console.log('КОЛЛИЗИЯ! Шар отбит битой');
       reverseBall();
       isSwingingRef.current = false; // Предотвращаем множественные отскоки
     }
@@ -200,10 +238,134 @@ const Scene = () => {
               Math.pow(debugBallPos.y - debugBatPos.y, 2)
             ))} px
           </div>
-          <div>
+          <div style={{ marginBottom: '10px' }}>
             <strong>Зона коллизии:</strong><br />
             Только по расстоянию<br />
             Радиус: {collisionConfig.bat.radius} px
+          </div>
+
+          {/* Ползунки настройки биты */}
+          <div style={{ borderTop: '1px solid #00ff00', paddingTop: '10px', marginBottom: '10px' }}>
+            <div style={{ marginBottom: '10px', fontWeight: 'bold', fontSize: '13px' }}>
+              ⚾ НАСТРОЙКА БИТЫ
+            </div>
+
+            {/* Длина */}
+            <label style={{ display: 'block', marginBottom: '4px' }}>
+              Длина: {batLength}px
+            </label>
+            <input
+              type="range"
+              min="1"
+              max="500"
+              value={batLength}
+              onChange={(e) => setBatLength(Number(e.target.value))}
+              style={{ width: '100%', marginBottom: '10px' }}
+            />
+
+            {/* Ширина */}
+            <label style={{ display: 'block', marginBottom: '4px' }}>
+              Ширина: {batWidth}px
+            </label>
+            <input
+              type="range"
+              min="1"
+              max="100"
+              value={batWidth}
+              onChange={(e) => setBatWidth(Number(e.target.value))}
+              style={{ width: '100%', marginBottom: '10px' }}
+            />
+
+            {/* Позиция Y (top) */}
+            <label style={{ display: 'block', marginBottom: '4px' }}>
+              Y (top): {batTop}px
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="1200"
+              value={batTop}
+              onChange={(e) => setBatTop(Number(e.target.value))}
+              style={{ width: '100%', marginBottom: '10px' }}
+            />
+
+            {/* Позиция X (left) */}
+            <label style={{ display: 'block', marginBottom: '4px' }}>
+              X (left): {batLeft}px
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="1200"
+              value={batLeft}
+              onChange={(e) => setBatLeft(Number(e.target.value))}
+              style={{ width: '100%', marginBottom: '10px' }}
+            />
+
+            {/* Начальный угол */}
+            <label style={{ display: 'block', marginBottom: '4px' }}>
+              Нач. угол: {batInitialAngle}°
+            </label>
+            <input
+              type="range"
+              min="-360"
+              max="360"
+              value={batInitialAngle}
+              onChange={(e) => setBatInitialAngle(Number(e.target.value))}
+              style={{ width: '100%', marginBottom: '10px' }}
+            />
+
+            {/* Угол момента удара */}
+            <label style={{ display: 'block', marginBottom: '4px' }}>
+              Угол удара: {batSwingAngle}°
+            </label>
+            <input
+              type="range"
+              min="-360"
+              max="360"
+              value={batSwingAngle}
+              onChange={(e) => setBatSwingAngle(Number(e.target.value))}
+              style={{ width: '100%', marginBottom: '10px' }}
+            />
+
+            <button
+              onClick={saveBatConfig}
+              style={{
+                width: '100%',
+                padding: '8px',
+                background: '#00aa00',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                marginBottom: '10px'
+              }}
+            >
+              💾 Сохранить конфиг
+            </button>
+
+            {savedConfig && (
+              <div>
+                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Конфиг для меня:</div>
+                <textarea
+                  readOnly
+                  value={savedConfig}
+                  style={{
+                    width: '100%',
+                    height: '120px',
+                    background: '#111',
+                    color: '#0f0',
+                    border: '1px solid #0f0',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    fontFamily: 'monospace',
+                    padding: '6px',
+                    resize: 'none'
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -250,6 +412,13 @@ const Scene = () => {
           <BaseballPlayer
             ref={baseballPlayerRef}
             sceneRotation={rotation}
+            debugMode={debugMode}
+            batLength={batLength}
+            batWidth={batWidth}
+            batTop={batTop}
+            batLeft={batLeft}
+            batInitialAngle={batInitialAngle}
+            batSwingAngle={batSwingAngle}
           />
 
           {/* Отладочная визуализация зоны коллизии */}
