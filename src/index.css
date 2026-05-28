@@ -192,3 +192,45 @@ body {
     opacity: 0;
   }
 }
+
+@keyframes windLine {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(300px);
+    opacity: 0;
+  }
+}
+
+@keyframes windCurve {
+  0% {
+    transform: translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(400px) rotate(20deg);
+    opacity: 0;
+  }
+}
+
+@keyframes windParticle {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(500px, -50px);
+    opacity: 0;
+  }
+}

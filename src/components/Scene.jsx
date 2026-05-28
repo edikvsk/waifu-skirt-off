@@ -6,6 +6,7 @@ import UIControls from './ui/UIControls';
 import Countdown from './ui/Countdown';
 import StarsRating from './ui/StarsRating';
 import HitEffect from './ui/HitEffect';
+import WindEffect from './ui/WindEffect';
 import Environment3D from './Environment3D';
 import Character from './Character';
 import Ball from './Ball';
@@ -27,6 +28,7 @@ const Scene = () => {
   const [starsCount, setStarsCount] = useState(null);
   const [hitEffectActive, setHitEffectActive] = useState(false);
   const [hitPosition, setHitPosition] = useState(null);
+  const [windEffectActive, setWindEffectActive] = useState(false);
 
   // Параметры невидимой биты (для отладки)
   const [batLength, setBatLength] = useState(collisionConfig.batVisual.length);
@@ -128,6 +130,16 @@ const Scene = () => {
     }
   }, [hitEffectActive]);
 
+  // Скрываем эффект ветра через 1.2 секунды
+  useEffect(() => {
+    if (windEffectActive) {
+      const timer = setTimeout(() => {
+        setWindEffectActive(false);
+      }, 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [windEffectActive]);
+
   const saveBatConfig = () => {
     const config = {
       batVisual: {
@@ -188,6 +200,9 @@ const Scene = () => {
       // Активируем эффект удара
       setHitPosition({ x: ballPos.x, y: ballPos.y });
       setHitEffectActive(true);
+
+      // Активируем эффект ветра
+      setWindEffectActive(true);
 
       // Определяем уровень ветра на основе скорости шара
       const newWindLevel = getWindLevelFromSpeed(speedValue);
@@ -263,6 +278,9 @@ const Scene = () => {
 
       {/* Эффект удара */}
       <HitEffect isActive={hitEffectActive} position={hitPosition} />
+
+      {/* Эффект ветра */}
+      <WindEffect isActive={windEffectActive} />
 
       {/* Кнопка отладочного режима */}
       <button
