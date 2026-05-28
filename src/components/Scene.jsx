@@ -9,6 +9,7 @@ import Ball from './Ball';
 import BaseballPlayer from './BaseballPlayer';
 import { collisionConfig } from '../config/collisionConfig';
 import { getElementGamePosition, calculateDistance, checkRotatedRectCircleCollision } from '../utils/coordinateUtils';
+import { getWindLevelFromSpeed } from '../utils/speedUtils';
 
 const Scene = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -135,6 +136,14 @@ const Scene = () => {
 
     if (hasCollision) {
       console.log('КОЛЛИЗИЯ! Шар отбит битой');
+      
+      // Определяем уровень ветра на основе скорости шара
+      const newWindLevel = getWindLevelFromSpeed(speedValue);
+      setWindLevel(newWindLevel);
+      setIsAnimating(true); // Включаем анимацию юбки
+      
+      console.log(`Скорость шара: ${speedValue}, Уровень ветра: ${newWindLevel}`);
+      
       reverseBall();
       isSwingingRef.current = false; // Предотвращаем множественные отскоки
     }

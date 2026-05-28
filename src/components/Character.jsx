@@ -11,8 +11,8 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
 
     // Определяем параметры анимации в зависимости от уровня ветра
     const windLevels = {
-      1: { scaleY: 0.85, rotation: 1.5, skewX: 1.5, y: 2, duration: 2 },
-      2: { scaleY: 0.55, rotation: 2, skewX: 2, y: 3, duration: 1.5 },
+      1: { scaleY: 0.85, rotation: 1.5, skewX: 1.5, y: 2, duration: 1.2 },
+      2: { scaleY: 0.55, rotation: 2, skewX: 2, y: 3, duration: 1.0 },
       3: { scaleY: 0.35, rotation: 3, skewX: 3, y: 5, duration: 1 }
     };
 

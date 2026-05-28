@@ -44,6 +44,13 @@ export const collisionConfig = {
     showCollisionZone: true, // Показывать зону коллизии
     showBatCenter: true, // Показывать центр биты
     showBallCenter: false, // Показывать центр шара
+  },
+
+  // Уровни скорости для анимации юбки
+  speedLevels: {
+    low: { min: 0, max: 33, windLevel: 1 },    // Низкая скорость - ветер1
+    normal: { min: 34, max: 66, windLevel: 2 }, // Обычная скорость - ветер2
+    high: { min: 67, max: 100, windLevel: 3 }   // Высокая скорость - ветер3
   }
 };
 
