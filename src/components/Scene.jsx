@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useSceneRotation } from '../hooks/useSceneRotation';
 import { useSpeedMeter } from '../hooks/useSpeedMeter';
 import { useBallAnimation } from '../hooks/useBallAnimation';
-import UIControls from './UIControls';
+import UIControls from './ui/UIControls';
+import Countdown from './ui/Countdown';
 import Environment3D from './Environment3D';
 import Character from './Character';
 import Ball from './Ball';
@@ -19,6 +20,8 @@ const Scene = () => {
   const [debugMode, setDebugMode] = useState(false);
   const [debugBatPos, setDebugBatPos] = useState({ x: 0, y: 0 });
   const [debugBallPos, setDebugBallPos] = useState({ x: 0, y: 0 });
+  const [isCountdownActive, setIsCountdownActive] = useState(false);
+  const [fixedSpeedValue, setFixedSpeedValue] = useState(null);
 
   // Параметры невидимой биты (для отладки)
   const [batLength, setBatLength] = useState(collisionConfig.batVisual.length);
@@ -32,7 +35,7 @@ const Scene = () => {
   // Custom hooks
   const { rotation, containerRef } = useSceneRotation();
   const { speedValue, setSpeedPaused, speedPaused } = useSpeedMeter();
-  const { ballRef, ballAnimating, animateBall, reverseBall, ballPosition } = useBallAnimation(speedValue, setSpeedPaused);
+  const { ballRef, ballAnimating, animateBall, reverseBall, ballPosition } = useBallAnimation(fixedSpeedValue !== null ? fixedSpeedValue : speedValue, setSpeedPaused);
   
   // Ref for baseball player swing function
   const baseballPlayerRef = useRef(null);
@@ -79,6 +82,25 @@ const Scene = () => {
       setIsAnimating(true);
     }
   };
+
+  const startBallWithCountdown = () => {
+    if (ballAnimating) return;
+    setFixedSpeedValue(speedValue);
+    setSpeedPaused(true); // Останавливаем шкалу скорости сразу при нажатии
+    setIsCountdownActive(true);
+  };
+
+  const handleCountdownComplete = () => {
+    setIsCountdownActive(false);
+    animateBall();
+  };
+
+  // Сбрасываем фиксированную скорость после завершения анимации шара
+  useEffect(() => {
+    if (!ballAnimating && fixedSpeedValue !== null) {
+      setFixedSpeedValue(null);
+    }
+  }, [ballAnimating, fixedSpeedValue]);
 
   const saveBatConfig = () => {
     const config = {
@@ -184,8 +206,14 @@ const Scene = () => {
         speedValue={speedValue}
         onWindLevelChange={setWindLevelAndAnimate}
         onToggleAnimation={toggleAnimation}
-        onAnimateBall={animateBall}
+        onAnimateBall={startBallWithCountdown}
         onSwingBat={swingBat}
+      />
+
+      {/* Обратный отсчёт */}
+      <Countdown
+        isActive={isCountdownActive}
+        onComplete={handleCountdownComplete}
       />
 
       {/* Кнопка отладочного режима */}
