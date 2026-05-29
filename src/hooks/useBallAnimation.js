@@ -15,8 +15,8 @@ export const useBallAnimation = (speedValue, setSpeedPaused) => {
     setSpeedPaused(true); // Останавливаем шкалу скорости
     
     // Вычисляем длительность полёта на основе скорости (чем выше скорость, тем быстрее полёт)
-    // Скорость 0 = 3 секунды, скорость 100 = 0.5 секунды
-    const duration = 3 - (speedValue / 100) * 2.5;
+    // Скорость 0 = 3 секунды, скорость 100 = 1 секунда
+    const duration = 3 - (speedValue / 100) * 2.0;
     
     // Случайное количество волн (2, 3 или 4)
     const waveCount = Math.floor(Math.random() * 3) + 2;
@@ -68,7 +68,7 @@ export const useBallAnimation = (speedValue, setSpeedPaused) => {
     gsap.set(ballRef.current, { x: currentX, y: currentY });
 
     // Запускаем анимацию в обратном направлении с параметрами из конфигурации
-    const duration = 3 - (speedValue / 100) * 2.5;
+    const duration = 3 - (speedValue / 100) * 2.0;
 
     animationRef.current = gsap.to(ballRef.current, {
       x: '-2000px',

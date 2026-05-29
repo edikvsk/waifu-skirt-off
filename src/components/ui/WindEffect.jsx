@@ -1,21 +1,57 @@
 import React from 'react';
 
-const WindEffect = ({ isActive }) => {
+const WindEffect = ({ isActive, windLevel }) => {
   if (!isActive) return null;
+
+  // Настройки интенсивности для разных уровней ветра
+  const intensity = {
+    1: { // Низкая скорость
+      lines: 3,
+      curves: 1,
+      particles: 4,
+      lineOpacity: 0.3,
+      curveOpacity: 0.2,
+      particleOpacity: 0.4,
+      lineWidth: '150px',
+      particleSize: '3px'
+    },
+    2: { // Средняя скорость (текущий эффект)
+      lines: 6,
+      curves: 3,
+      particles: 10,
+      lineOpacity: 0.6,
+      curveOpacity: 0.4,
+      particleOpacity: 0.7,
+      lineWidth: '200px',
+      particleSize: '4px'
+    },
+    3: { // Высокая скорость
+      lines: 10,
+      curves: 5,
+      particles: 15,
+      lineOpacity: 0.8,
+      curveOpacity: 0.6,
+      particleOpacity: 0.9,
+      lineWidth: '250px',
+      particleSize: '5px'
+    }
+  };
+
+  const config = intensity[windLevel] || intensity[2];
 
   return (
     <>
       {/* Горизонтальные линии ветра */}
-      {[0, 1, 2, 3, 4, 5].map((i) => (
+      {[...Array(config.lines)].map((_, i) => (
         <div
           key={i}
           style={{
             position: 'fixed',
             left: '30%',
             top: `${40 + i * 8}%`,
-            width: '200px',
+            width: config.lineWidth,
             height: '2px',
-            background: 'linear-gradient(to right, transparent, rgba(255, 255, 255, 0.6), transparent)',
+            background: `linear-gradient(to right, transparent, rgba(255, 255, 255, ${config.lineOpacity}), transparent)`,
             zIndex: 1400,
             pointerEvents: 'none',
             animation: `windLine 0.8s ease-out ${i * 0.1}s forwards`
@@ -24,7 +60,7 @@ const WindEffect = ({ isActive }) => {
       ))}
 
       {/* Кривые линии ветра */}
-      {[0, 1, 2].map((i) => (
+      {[...Array(config.curves)].map((_, i) => (
         <div
           key={`curve-${i}`}
           style={{
@@ -33,7 +69,7 @@ const WindEffect = ({ isActive }) => {
             top: `${45 + i * 10}%`,
             width: '150px',
             height: '30px',
-            border: '2px solid rgba(255, 255, 255, 0.4)',
+            border: `2px solid rgba(255, 255, 255, ${config.curveOpacity})`,
             borderRadius: '50%',
             zIndex: 1400,
             pointerEvents: 'none',
@@ -43,16 +79,16 @@ const WindEffect = ({ isActive }) => {
       ))}
 
       {/* Частицы ветра */}
-      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
+      {[...Array(config.particles)].map((_, i) => (
         <div
           key={`particle-${i}`}
           style={{
             position: 'fixed',
             left: `${30 + Math.random() * 30}%`,
             top: `${35 + Math.random() * 25}%`,
-            width: '4px',
-            height: '4px',
-            background: 'rgba(255, 255, 255, 0.7)',
+            width: config.particleSize,
+            height: config.particleSize,
+            background: `rgba(255, 255, 255, ${config.particleOpacity})`,
             borderRadius: '50%',
             zIndex: 1400,
             pointerEvents: 'none',

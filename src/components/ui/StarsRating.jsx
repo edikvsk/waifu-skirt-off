@@ -1,9 +1,11 @@
 import React from 'react';
 
-const StarsRating = ({ filledCount }) => {
+const StarsRating = ({ filledCount, visibleCount }) => {
   if (filledCount === null || filledCount === 0) return null;
 
   const renderStar = (index) => {
+    if (index >= visibleCount) return null; // Не отображаем звёзды, которые ещё не появились
+
     const isFilled = index < filledCount;
     return (
       <svg
@@ -13,7 +15,8 @@ const StarsRating = ({ filledCount }) => {
         viewBox="0 0 24 24"
         style={{
           margin: '0 5px',
-          filter: isFilled ? 'drop-shadow(0 0 8px rgba(255, 215, 61, 0.8))' : 'none'
+          filter: isFilled ? 'drop-shadow(0 0 12px rgba(255, 215, 61, 0.9))' : 'none',
+          animation: 'starPop 0.6s ease-out'
         }}
       >
         <path
@@ -37,8 +40,7 @@ const StarsRating = ({ filledCount }) => {
       zIndex: 2000,
       pointerEvents: 'none',
       display: 'flex',
-      alignItems: 'center',
-      animation: 'starsAppear 0.5s ease-out'
+      alignItems: 'center'
     }}>
       {[0, 1, 2].map(renderStar)}
     </div>

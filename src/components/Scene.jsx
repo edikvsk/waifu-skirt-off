@@ -26,6 +26,7 @@ const Scene = () => {
   const [isCountdownActive, setIsCountdownActive] = useState(false);
   const [fixedSpeedValue, setFixedSpeedValue] = useState(null);
   const [starsCount, setStarsCount] = useState(null);
+  const [visibleStarsCount, setVisibleStarsCount] = useState(0);
   const [hitEffectActive, setHitEffectActive] = useState(false);
   const [hitPosition, setHitPosition] = useState(null);
   const [windEffectActive, setWindEffectActive] = useState(false);
@@ -140,6 +141,22 @@ const Scene = () => {
     }
   }, [windEffectActive]);
 
+  // Последовательное появление звёзд после окончания ветра
+  useEffect(() => {
+    if (starsCount !== null && visibleStarsCount === 0 && !windEffectActive) {
+      // Начинаем показывать звёзды после окончания ветра
+      let currentVisible = 0;
+      const showNextStar = () => {
+        if (currentVisible < starsCount) {
+          currentVisible++;
+          setVisibleStarsCount(currentVisible);
+          setTimeout(showNextStar, 600); // Интервал между звёздами 600мс
+        }
+      };
+      showNextStar();
+    }
+  }, [starsCount, windEffectActive, visibleStarsCount]);
+
   const saveBatConfig = () => {
     const config = {
       batVisual: {
@@ -201,8 +218,10 @@ const Scene = () => {
       setHitPosition({ x: ballPos.x, y: ballPos.y });
       setHitEffectActive(true);
 
-      // Активируем эффект ветра
-      setWindEffectActive(true);
+      // Активируем эффект ветра с задержкой
+      setTimeout(() => {
+        setWindEffectActive(true);
+      }, 1000);
 
       // Определяем уровень ветра на основе скорости шара
       const newWindLevel = getWindLevelFromSpeed(speedValue);
@@ -220,6 +239,7 @@ const Scene = () => {
         newStarsCount = 1; // Низкая скорость - 1 звезда
       }
       setStarsCount(newStarsCount);
+      setVisibleStarsCount(0); // Сбрасываем видимые звёзды
 
       console.log(`Скорость шара: ${speedValue}, Уровень ветра: ${newWindLevel}, Звёзды: ${newStarsCount}`);
 
@@ -274,13 +294,13 @@ const Scene = () => {
       />
 
       {/* Рейтинг звёзд */}
-      <StarsRating filledCount={starsCount} />
+      <StarsRating filledCount={starsCount} visibleCount={visibleStarsCount} />
 
       {/* Эффект удара */}
       <HitEffect isActive={hitEffectActive} position={hitPosition} />
 
       {/* Эффект ветра */}
-      <WindEffect isActive={windEffectActive} />
+      <WindEffect isActive={windEffectActive} windLevel={windLevel} />
 
       {/* Кнопка отладочного режима */}
       <button
