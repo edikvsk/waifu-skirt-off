@@ -7,6 +7,7 @@ import Countdown from './ui/Countdown';
 import StarsRating from './ui/StarsRating';
 import HitEffect from './ui/HitEffect';
 import WindEffect from './ui/WindEffect';
+import ResultsModal from './ui/ResultsModal';
 import Environment3D from './Environment3D';
 import Character from './Character';
 import Ball from './Ball';
@@ -15,7 +16,7 @@ import { collisionConfig } from '../config/collisionConfig';
 import { getElementGamePosition, calculateDistance, checkRotatedRectCircleCollision } from '../utils/coordinateUtils';
 import { getWindLevelFromSpeed } from '../utils/speedUtils';
 
-const Scene = () => {
+const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [windLevel, setWindLevel] = useState(1);
@@ -30,6 +31,12 @@ const Scene = () => {
   const [hitEffectActive, setHitEffectActive] = useState(false);
   const [hitPosition, setHitPosition] = useState(null);
   const [windEffectActive, setWindEffectActive] = useState(false);
+  const [currentBallNumber, setCurrentBallNumber] = useState(1);
+  const [totalBallsLaunched, setTotalBallsLaunched] = useState(0);
+  const [isBallSequenceActive, setIsBallSequenceActive] = useState(false);
+  const [ballResults, setBallResults] = useState([]);
+  const [showResultsModal, setShowResultsModal] = useState(false);
+  const [sequenceCompleted, setSequenceCompleted] = useState(false);
 
   // Параметры невидимой биты (для отладки)
   const [batLength, setBatLength] = useState(collisionConfig.batVisual.length);
@@ -49,6 +56,18 @@ const Scene = () => {
   const baseballPlayerRef = useRef(null);
   const isSwingingRef = useRef(false);
   const gameContainerRef = useRef(null);
+  
+  // Refs для стабильных функций в useEffect
+  const animateBallRef = useRef(null);
+  const setSpeedPausedRef = useRef(null);
+  const nextBallTimerRef = useRef(null);
+  const speedValueRef = useRef(speedValue);
+  const isLaunchingNextBallRef = useRef(false);
+  
+  // Обновляем refs когда значения меняются
+  animateBallRef.current = animateBall;
+  setSpeedPausedRef.current = setSpeedPaused;
+  speedValueRef.current = speedValue;
 
   // Масштабирование игрового контейнера как в играх
   useEffect(() => {
@@ -92,16 +111,73 @@ const Scene = () => {
   };
 
   const startBallWithCountdown = () => {
-    if (ballAnimating) return;
+    if (isBallSequenceActive) return;
+    setIsBallSequenceActive(true);
+    setSequenceCompleted(false);
+    setCurrentBallNumber(1);
+    setTotalBallsLaunched(0);
+    setBallResults([]); // Сбрасываем результаты перед новой последовательностью
+    
+    // Первый шар с обратным отсчётом
     setFixedSpeedValue(speedValue);
-    setSpeedPaused(true); // Останавливаем шкалу скорости сразу при нажатии
+    setSpeedPaused(true);
     setIsCountdownActive(true);
   };
 
   const handleCountdownComplete = () => {
     setIsCountdownActive(false);
     animateBall();
+    setTotalBallsLaunched(1);
   };
+
+  // Запуск следующего шара после завершения анимации
+  useEffect(() => {
+    // Очищаем предыдущий таймер если есть
+    if (nextBallTimerRef.current) {
+      clearTimeout(nextBallTimerRef.current);
+      nextBallTimerRef.current = null;
+    }
+
+    if (!ballAnimating && isBallSequenceActive && totalBallsLaunched > 0 && totalBallsLaunched < 10 && !isLaunchingNextBallRef.current) {
+      console.log(`Запуск шара ${totalBallsLaunched + 1}`);
+      isLaunchingNextBallRef.current = true;
+      nextBallTimerRef.current = setTimeout(() => {
+        setCurrentBallNumber(totalBallsLaunched + 1);
+        setFixedSpeedValue(speedValueRef.current);
+        setSpeedPausedRef.current(true);
+        animateBallRef.current();
+        setTotalBallsLaunched(prev => prev + 1);
+        nextBallTimerRef.current = null;
+        isLaunchingNextBallRef.current = false;
+      }, 2000); // Задержка 2 секунды между шарами
+    } else if (!ballAnimating && isBallSequenceActive && totalBallsLaunched >= 10) {
+      console.log('Последовательность завершена');
+      // Вычисляем максимальный результат
+      const maxResult = ballResults.length > 0 ? Math.max(...ballResults) : 0;
+      console.log('Результаты:', ballResults, 'Максимальный:', maxResult);
+      
+      // Сохраняем результат уровня
+      onLevelComplete(currentLevel, maxResult);
+      
+      // Показываем модальное окно с задержкой 2 секунды
+      setTimeout(() => {
+        setShowResultsModal(true);
+      }, 2000);
+      
+      // Последовательность завершена
+      setIsBallSequenceActive(false);
+      setSequenceCompleted(true);
+      setCurrentBallNumber(1);
+      setTotalBallsLaunched(0);
+      isLaunchingNextBallRef.current = false;
+    }
+
+    return () => {
+      if (nextBallTimerRef.current) {
+        clearTimeout(nextBallTimerRef.current);
+      }
+    };
+  }, [ballAnimating, isBallSequenceActive, totalBallsLaunched]);
 
   // Сбрасываем фиксированную скорость после завершения анимации шара
   useEffect(() => {
@@ -241,6 +317,9 @@ const Scene = () => {
       setStarsCount(newStarsCount);
       setVisibleStarsCount(0); // Сбрасываем видимые звёзды
 
+      // Сохраняем результат для текущего шара
+      setBallResults(prev => [...prev, newStarsCount]);
+
       console.log(`Скорость шара: ${speedValue}, Уровень ветра: ${newWindLevel}, Звёзды: ${newStarsCount}`);
 
       reverseBall();
@@ -280,11 +359,13 @@ const Scene = () => {
         windLevel={windLevel}
         isAnimating={isAnimating}
         ballAnimating={ballAnimating}
+        isCountdownActive={isCountdownActive}
+        currentBallNumber={currentBallNumber}
+        isBallSequenceActive={isBallSequenceActive}
+        sequenceCompleted={sequenceCompleted}
         speedValue={speedValue}
         onWindLevelChange={setWindLevelAndAnimate}
-        onToggleAnimation={toggleAnimation}
         onAnimateBall={startBallWithCountdown}
-        onSwingBat={swingBat}
       />
 
       {/* Обратный отсчёт */}
@@ -301,6 +382,17 @@ const Scene = () => {
 
       {/* Эффект ветра */}
       <WindEffect isActive={windEffectActive} windLevel={windLevel} />
+
+      {/* Модальное окно с результатами */}
+      {showResultsModal && (
+        <ResultsModal 
+          maxStars={ballResults.length > 0 ? Math.max(...ballResults) : 0}
+          onClose={() => {
+            setShowResultsModal(false);
+            onBackToMenu();
+          }}
+        />
+      )}
 
       {/* Кнопка отладочного режима */}
       <button
@@ -496,6 +588,7 @@ const Scene = () => {
       {/* Игровой контейнер с фиксированным размером */}
       <div 
         ref={gameContainerRef}
+        onClick={swingBat}
         style={{
           position: 'fixed',
           top: '50%',
@@ -504,7 +597,12 @@ const Scene = () => {
           width: '1920px',
           height: '1080px',
           transformOrigin: 'center center',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          willChange: 'transform',
+          zIndex: 1,
+          backfaceVisibility: 'hidden',
+          perspective: '1000px',
+          cursor: 'pointer'
         }}
       >
         {/* 3D сцена */}
@@ -515,7 +613,9 @@ const Scene = () => {
             transform: `rotateX(${-rotation.x}deg) rotateY(${rotation.y}deg)`,
             transition: 'transform 0.1s ease-out',
             width: '100%',
-            height: '100%'
+            height: '100%',
+            willChange: 'transform',
+            transformStyle: 'preserve-3d'
           }}
         >
           {/* 3D окружение (пол) */}
