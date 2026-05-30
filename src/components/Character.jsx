@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 
-const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotation, speedLevel }) => {
+const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotation, speedLevel, currentLevel, animationTrigger }) => {
   const skirtRef = useRef(null);
   const timelineRef = useRef(null);
   const characterRef = useRef(null);
@@ -75,7 +75,7 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
       const wave1 = Math.sin(time * 2) * 3;
       const wave2 = Math.sin(time * 3 + 1) * 2;
       const wave3 = Math.sin(time * 1.5 + 2) * 3;
-      
+
       // Верхняя 25% остается неподвижной (резинка), волна только в нижней части
       const clipPath = `polygon(
         0% 0%,
@@ -85,9 +85,9 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
         ${0 + wave1}% 100%,
         ${0 + wave1}% 25%
       )`;
-      
+
       skirtRef.current.style.clipPath = clipPath;
-      
+
       requestAnimationFrame(animateClipPath);
     };
 
@@ -96,7 +96,7 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
     return () => {
       tl.kill();
     };
-  }, [imageLoaded, windLevel, isAnimating]);
+  }, [imageLoaded, windLevel, isAnimating, animationTrigger]);
 
   // Управление воспроизведением анимации
   useEffect(() => {
@@ -120,16 +120,22 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
     characterRef.current.style.transform = `rotateY(${counterRotateY}deg)`;
   }, [sceneRotation]);
 
-  // Определяем спрайт в зависимости от уровня скорости
+  // Определяем спрайт в зависимости от уровня скорости и уровня игры
   const getGirlSprite = () => {
+    const suffix = currentLevel === 2 ? '_2' : '';
     switch (speedLevel) {
       case 'high':
-        return '/layer_girl_fast.png';
+        return `/layer_girl_fast${suffix}.png`;
       case 'normal':
-        return '/layer_girl_medium.png';
+        return `/layer_girl_medium${suffix}.png`;
       default:
-        return '/layer_girl.png';
+        return currentLevel === 2 ? '/layer_girl_slow_2.png' : '/layer_girl.png';
     }
+  };
+
+  // Определяем спрайт юбки в зависимости от уровня игры
+  const getSkirtSprite = () => {
+    return currentLevel === 2 ? '/layer_skirt_2.png' : '/layer_skirt.png';
   };
 
   return (
@@ -158,7 +164,8 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
         style={{
           position: 'relative',
           zIndex: 1,
-          maxHeight: '550px',
+          maxHeight: currentLevel === 2 ? 'auto' : '550px',
+          height: currentLevel === 2 ? '632px' : 'auto',
           width: 'auto',
           display: 'block',
           filter: 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
@@ -166,16 +173,16 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
       />
       
       {/* Юбка поверх персонажа - позиционируется на талии */}
-      <img 
+      <img
         ref={skirtRef}
-        src="/layer_skirt.png" 
-        alt="Skirt" 
+        src={getSkirtSprite()}
+        alt="Skirt"
         className="skirt-image"
-        style={{ 
+        style={{
           position: 'absolute',
           top: '37%',
           left: '47%',
-          transform: 'translateX(-50%) scaleX(1.05)',
+          transform: `translateX(-50%) scaleX(${currentLevel === 2 ? '1.35' : '1.05'})`,
           maxHeight: '132px',
           width: 'auto',
           zIndex: 2,

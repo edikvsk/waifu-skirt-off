@@ -41,6 +41,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
   const [trafficLightColor, setTrafficLightColor] = useState(null);
   const [animationsComplete, setAnimationsComplete] = useState(false);
   const [speedLevel, setSpeedLevel] = useState('low');
+  const [animationTrigger, setAnimationTrigger] = useState(0);
 
   // Параметры невидимой биты (для отладки)
   const [batLength, setBatLength] = useState(collisionConfig.batVisual.length);
@@ -52,7 +53,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
   const [savedConfig, setSavedConfig] = useState('');
   
   // Custom hooks
-  const { rotation, containerRef } = useSceneRotation();
+  const { rotation, containerRef } = useSceneRotation(isBallSequenceActive);
   const { speedValue, setSpeedPaused, speedPaused } = useSpeedMeter();
   const { ballRef, ballAnimating, animateBall, reverseBall, ballPosition } = useBallAnimation(fixedSpeedValue !== null ? fixedSpeedValue : speedValue, setSpeedPaused);
   
@@ -298,10 +299,11 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
   };
 
   const swingBat = () => {
+    if (!isBallSequenceActive) return; // Не разрешаем удар когда кнопка BALL видна
     if (baseballPlayerRef.current && baseballPlayerRef.current.swingBat) {
       baseballPlayerRef.current.swingBat();
       isSwingingRef.current = true;
-      
+
       // Проверка коллизии во время взмаха
       setTimeout(() => {
         isSwingingRef.current = false;
@@ -368,6 +370,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
       setSpeedLevel(newSpeedLevel);
       setStarsCount(newStarsCount);
       setVisibleStarsCount(0); // Сбрасываем видимые звёзды
+      setAnimationTrigger(prev => prev + 1); // Триггер для перезапуска анимации
 
       // Сохраняем результат для текущего шара
       setBallResults(prev => [...prev, newStarsCount]);
@@ -684,6 +687,8 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
             windLevel={windLevel}
             sceneRotation={rotation}
             speedLevel={speedLevel}
+            currentLevel={currentLevel}
+            animationTrigger={animationTrigger}
           >
             <Ball ref={ballRef} />
           </Character>
