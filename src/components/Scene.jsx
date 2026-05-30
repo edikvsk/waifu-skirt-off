@@ -40,6 +40,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
   const [sequenceCompleted, setSequenceCompleted] = useState(false);
   const [trafficLightColor, setTrafficLightColor] = useState(null);
   const [animationsComplete, setAnimationsComplete] = useState(false);
+  const [speedLevel, setSpeedLevel] = useState('low');
 
   // Параметры невидимой биты (для отладки)
   const [batLength, setBatLength] = useState(collisionConfig.batVisual.length);
@@ -350,16 +351,21 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
       setWindLevel(newWindLevel);
       setIsAnimating(true); // Включаем анимацию юбки
 
-      // Определяем количество звёзд на основе скорости
+      // Определяем уровень скорости для спрайта девушки
       const { speedLevels } = collisionConfig;
+      let newSpeedLevel = 'low';
       let newStarsCount = 0;
       if (speedValue >= speedLevels.high.min && speedValue <= speedLevels.high.max) {
+        newSpeedLevel = 'high';
         newStarsCount = 3; // Высокая скорость - 3 звезды
       } else if (speedValue >= speedLevels.normal.min && speedValue <= speedLevels.normal.max) {
+        newSpeedLevel = 'normal';
         newStarsCount = 2; // Обычная скорость - 2 звезды
       } else {
+        newSpeedLevel = 'low';
         newStarsCount = 1; // Низкая скорость - 1 звезда
       }
+      setSpeedLevel(newSpeedLevel);
       setStarsCount(newStarsCount);
       setVisibleStarsCount(0); // Сбрасываем видимые звёзды
 
@@ -677,6 +683,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
             isAnimating={isAnimating}
             windLevel={windLevel}
             sceneRotation={rotation}
+            speedLevel={speedLevel}
           >
             <Ball ref={ballRef} />
           </Character>

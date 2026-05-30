@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 
-const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotation }) => {
+const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotation, speedLevel }) => {
   const skirtRef = useRef(null);
   const timelineRef = useRef(null);
   const characterRef = useRef(null);
@@ -112,13 +112,25 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
   // Контр-вращение персонажа для создания объёма (billboarding эффект)
   useEffect(() => {
     if (!characterRef.current || !sceneRotation) return;
-    
+
     // Применяем контр-вращение по оси Y, чтобы персонаж оставался более лицевым к камере
     // Используем 50% от вращения сцены для создания эффекта объёма
     const counterRotateY = -sceneRotation.y * 0.5;
-    
+
     characterRef.current.style.transform = `rotateY(${counterRotateY}deg)`;
   }, [sceneRotation]);
+
+  // Определяем спрайт в зависимости от уровня скорости
+  const getGirlSprite = () => {
+    switch (speedLevel) {
+      case 'high':
+        return '/layer_girl_fast.png';
+      case 'normal':
+        return '/layer_girl_medium.png';
+      default:
+        return '/layer_girl.png';
+    }
+  };
 
   return (
     <div 
@@ -139,11 +151,11 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
       {children}
       
       {/* Базовое изображение персонажа */}
-      <img 
-        src="/layer_girl.png" 
-        alt="Character" 
+      <img
+        src={getGirlSprite()}
+        alt="Character"
         className="base-image"
-        style={{ 
+        style={{
           position: 'relative',
           zIndex: 1,
           maxHeight: '550px',
