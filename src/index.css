@@ -44,11 +44,11 @@ body {
 
 .floor-3d {
   position: absolute;
-  bottom: 0;
+  bottom: -500px;
   left: 50%;
   transform: translateX(-50%) rotateX(60deg);
-  width: 3840px;
-  height: 1080px;
+  width: 7680px;
+  height: 2160px;
   background: linear-gradient(180deg, 
     rgba(30, 30, 50, 0.9) 0%, 
     rgba(20, 20, 40, 0.95) 50%,

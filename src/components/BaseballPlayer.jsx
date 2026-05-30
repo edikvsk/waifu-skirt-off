@@ -107,13 +107,13 @@ const BaseballPlayer = forwardRef(({
       {/* Тень под бейсболистом */}
       <div style={{
         position: 'absolute',
-        bottom: '-20px',
-        left: '450px',
+        bottom: '0px',
+        left: '60%',
         transform: 'translateX(-50%) rotateX(60deg)',
-        width: '150px',
-        height: '40px',
-        background: 'radial-gradient(ellipse, rgba(0, 0, 0, 0.4) 0%, transparent 70%)',
-        filter: 'blur(8px)',
+        width: '500px',
+        height: '80px',
+        background: 'radial-gradient(ellipse, rgba(0, 0, 0, 0.5) 0%, transparent 70%)',
+        filter: 'blur(12px)',
         zIndex: 0
       }} />
       

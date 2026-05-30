@@ -52,7 +52,7 @@ function LevelMenu({ onLevelSelect, onBack, levelResults, totalStars }) {
             <div style={{ fontSize: '48px', fontWeight: 'bold' }}>
               {level.id}
             </div>
-            {levelResults[level.id] && (
+            {levelResults[level.id] > 0 && (
               <div style={{
                 position: 'absolute',
                 bottom: '-12px',

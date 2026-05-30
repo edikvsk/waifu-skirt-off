@@ -8,6 +8,7 @@ import StarsRating from './ui/StarsRating';
 import HitEffect from './ui/HitEffect';
 import WindEffect from './ui/WindEffect';
 import ResultsModal from './ui/ResultsModal';
+import TrafficLight from './ui/TrafficLight';
 import Environment3D from './Environment3D';
 import Character from './Character';
 import Ball from './Ball';
@@ -37,6 +38,8 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
   const [ballResults, setBallResults] = useState([]);
   const [showResultsModal, setShowResultsModal] = useState(false);
   const [sequenceCompleted, setSequenceCompleted] = useState(false);
+  const [trafficLightColor, setTrafficLightColor] = useState(null);
+  const [animationsComplete, setAnimationsComplete] = useState(false);
 
   // Параметры невидимой биты (для отладки)
   const [batLength, setBatLength] = useState(collisionConfig.batVisual.length);
@@ -118,6 +121,19 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
     setTotalBallsLaunched(0);
     setBallResults([]); // Сбрасываем результаты перед новой последовательностью
     
+    // Запускаем светофор перед первым броском
+    setTrafficLightColor('red');
+    
+    // Жёлтый через 1 секунду
+    setTimeout(() => {
+      setTrafficLightColor('yellow');
+    }, 1000);
+    
+    // Синий через 2 секунды
+    setTimeout(() => {
+      setTrafficLightColor('blue');
+    }, 2000);
+    
     // Первый шар с обратным отсчётом
     setFixedSpeedValue(speedValue);
     setSpeedPaused(true);
@@ -138,9 +154,29 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
       nextBallTimerRef.current = null;
     }
 
-    if (!ballAnimating && isBallSequenceActive && totalBallsLaunched > 0 && totalBallsLaunched < 10 && !isLaunchingNextBallRef.current) {
+    if (!ballAnimating && isBallSequenceActive && totalBallsLaunched > 0 && totalBallsLaunched < 10 && !isLaunchingNextBallRef.current && animationsComplete) {
       console.log(`Запуск шара ${totalBallsLaunched + 1}`);
       isLaunchingNextBallRef.current = true;
+      
+      // Гасим синий перед новым циклом
+      setTrafficLightColor(null);
+      
+      // Красный через 0.2 сек
+      const redTimer = setTimeout(() => {
+        setTrafficLightColor('red');
+      }, 200);
+      
+      // Жёлтый через 1.2 секунды
+      const yellowTimer = setTimeout(() => {
+        setTrafficLightColor('yellow');
+      }, 1200);
+      
+      // Синий через 2.2 секунды
+      const blueTimer = setTimeout(() => {
+        setTrafficLightColor('blue');
+      }, 2200);
+      
+      // Запуск шара через 3.2 секунды (синий продолжает гореть)
       nextBallTimerRef.current = setTimeout(() => {
         setCurrentBallNumber(totalBallsLaunched + 1);
         setFixedSpeedValue(speedValueRef.current);
@@ -149,9 +185,13 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
         setTotalBallsLaunched(prev => prev + 1);
         nextBallTimerRef.current = null;
         isLaunchingNextBallRef.current = false;
-      }, 2000); // Задержка 2 секунды между шарами
+        clearTimeout(redTimer);
+        clearTimeout(yellowTimer);
+        clearTimeout(blueTimer);
+      }, 3200);
     } else if (!ballAnimating && isBallSequenceActive && totalBallsLaunched >= 10) {
       console.log('Последовательность завершена');
+      setTrafficLightColor(null);
       // Вычисляем максимальный результат
       const maxResult = ballResults.length > 0 ? Math.max(...ballResults) : 0;
       console.log('Результаты:', ballResults, 'Максимальный:', maxResult);
@@ -177,7 +217,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
         clearTimeout(nextBallTimerRef.current);
       }
     };
-  }, [ballAnimating, isBallSequenceActive, totalBallsLaunched]);
+  }, [ballAnimating, isBallSequenceActive, totalBallsLaunched, animationsComplete]);
 
   // Сбрасываем фиксированную скорость после завершения анимации шара
   useEffect(() => {
@@ -232,6 +272,12 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
       showNextStar();
     }
   }, [starsCount, windEffectActive, visibleStarsCount]);
+
+  // Отслеживаем завершение всех анимаций
+  useEffect(() => {
+    const allEffectsComplete = !hitEffectActive && !windEffectActive && starsCount === null;
+    setAnimationsComplete(allEffectsComplete);
+  }, [hitEffectActive, windEffectActive, starsCount]);
 
   const saveBatConfig = () => {
     const config = {
@@ -354,6 +400,9 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
 
   return (
     <>
+      {/* Светофор между бросками */}
+      {!isCountdownActive && !ballAnimating && !isBallSequenceActive && !sequenceCompleted ? null : <TrafficLight activeColor={trafficLightColor || 'off'} />}
+
       {/* UI слой - кнопки и шкала скорости */}
       <UIControls
         windLevel={windLevel}
@@ -615,7 +664,8 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
             width: '100%',
             height: '100%',
             willChange: 'transform',
-            transformStyle: 'preserve-3d'
+            transformStyle: 'preserve-3d',
+            transformOrigin: '400px 555px'
           }}
         >
           {/* 3D окружение (пол) */}

@@ -14,9 +14,9 @@ export const useSceneRotation = () => {
       const mouseX = e.clientX;
       const mouseY = e.clientY;
       
-      // Ограничиваем угол вращения (максимум ±15 градусов)
-      const rotateY = ((mouseX - centerX) / centerX) * 15;
-      const rotateX = ((mouseY - centerY) / centerY) * 10;
+      // Ограничиваем угол вращения (максимум ±7 градусов)
+      const rotateY = ((mouseX - centerX) / centerX) * 7;
+      const rotateX = ((mouseY - centerY) / centerY) * 5;
       
       setRotation({ x: rotateX, y: rotateY });
     };
