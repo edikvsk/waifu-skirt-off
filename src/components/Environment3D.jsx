@@ -3,6 +3,7 @@ import React from 'react';
 const Environment3D = ({ currentLevel }) => {
   const isJapaneseSchool = currentLevel === 1;
   const isLoveHotel = currentLevel === 2;
+  const isLevel3 = currentLevel === 3;
 
   return (
     <>
@@ -84,8 +85,8 @@ const Environment3D = ({ currentLevel }) => {
       )}
 
       {/* 3D пол - стиль зависит от уровня */}
-      <div className={`floor-3d ${isJapaneseSchool ? 'floor-school' : isLoveHotel ? 'floor-love-hotel' : 'floor-default'}`}>
-        <div className={`floor-grid ${isJapaneseSchool ? 'grid-school' : isLoveHotel ? 'grid-love-hotel' : 'grid-default'}`}></div>
+      <div className={`floor-3d ${isJapaneseSchool ? 'floor-school' : isLoveHotel ? 'floor-love-hotel' : isLevel3 ? 'floor-love-hotel' : 'floor-default'}`}>
+        <div className={`floor-grid ${isJapaneseSchool ? 'grid-school' : isLoveHotel ? 'grid-love-hotel' : isLevel3 ? 'grid-love-hotel' : 'grid-default'}`}></div>
       </div>
     </>
   );

@@ -122,20 +122,38 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
 
   // Определяем спрайт в зависимости от уровня скорости и уровня игры
   const getGirlSprite = () => {
-    const suffix = currentLevel === 2 ? '_2' : '';
+    const suffix = currentLevel === 2 ? '_2' : currentLevel === 3 ? '_3' : '';
     switch (speedLevel) {
       case 'high':
         return `/layer_girl_fast${suffix}.png`;
       case 'normal':
         return `/layer_girl_medium${suffix}.png`;
       default:
-        return currentLevel === 2 ? '/layer_girl_slow_2.png' : '/layer_girl.png';
+        if (currentLevel === 2) return '/layer_girl_slow_2.png';
+        if (currentLevel === 3) return '/layer_girl_slow_3.png';
+        return '/layer_girl.png';
     }
   };
 
   // Определяем спрайт юбки в зависимости от уровня игры
   const getSkirtSprite = () => {
-    return currentLevel === 2 ? '/layer_skirt_2.png' : '/layer_skirt.png';
+    if (currentLevel === 2) return '/layer_skirt_2.png';
+    if (currentLevel === 3) return '/layer_skirt_3.png';
+    return '/layer_skirt.png';
+  };
+
+  // Конфигурация позиционирования юбки для каждого уровня
+  const getSkirtPosition = () => {
+    switch (currentLevel) {
+      case 1:
+        return { top: '37%', left: '47%', scaleX: '1.05', maxHeight: '120px' };
+      case 2:
+        return { top: '37%', left: '47%', scaleX: '1.35', maxHeight: '120px' };
+      case 3:
+        return { top: '37%', left: '40%', scaleX: '0.83', maxHeight: '138px' };
+      default:
+        return { top: '37%', left: '47%', scaleX: '1.05', maxHeight: '120px' };
+    }
   };
 
   return (
@@ -164,11 +182,11 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
         style={{
           position: 'relative',
           zIndex: 1,
-          maxHeight: currentLevel === 2 ? 'auto' : '500px',
-          height: currentLevel === 2 ? '500px' : 'auto',
+          maxHeight: currentLevel === 2 ? 'auto' : currentLevel === 3 ? 'auto' : '500px',
+          height: currentLevel === 2 ? '500px' : currentLevel === 3 ? '575px' : 'auto',
           width: 'auto',
           display: 'block',
-          filter: currentLevel === 2 
+          filter: currentLevel === 2
             ? 'drop-shadow(0 0 10px rgba(255, 0, 102, 0.4)) drop-shadow(0 0 20px rgba(255, 0, 102, 0.2)) drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
             : 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
         }}
@@ -182,10 +200,10 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
         className="skirt-image"
         style={{
           position: 'absolute',
-          top: '37%',
-          left: '47%',
-          transform: `translateX(-50%) scaleX(${currentLevel === 2 ? '1.35' : '1.05'})`,
-          maxHeight: '120px',
+          top: getSkirtPosition().top,
+          left: getSkirtPosition().left,
+          transform: `translateX(-50%) scaleX(${getSkirtPosition().scaleX})`,
+          maxHeight: getSkirtPosition().maxHeight,
           width: 'auto',
           zIndex: 2,
           transformOrigin: 'top center',
