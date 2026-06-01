@@ -678,7 +678,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
           }}
         >
           {/* 3D окружение (пол) */}
-          <Environment3D />
+          <Environment3D currentLevel={currentLevel} />
           
           {/* Персонаж с дочерними элементами */}
           <Character
