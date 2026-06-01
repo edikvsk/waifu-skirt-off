@@ -72,6 +72,156 @@ body {
   transform: translateZ(1px);
 }
 
+/* Фон японской школы */
+.school-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  z-index: 1;
+}
+
+/* Задняя стена */
+.back-wall {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateZ(-800px);
+  width: 3000px;
+  height: 800px;
+  background: linear-gradient(180deg, #f5e6d3 0%, #e8d4c0 100%);
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.1);
+}
+
+/* Окна */
+.window {
+  position: absolute;
+  width: 200px;
+  height: 300px;
+  background: linear-gradient(180deg, #87ceeb 0%, #b0e0e6 50%, #87ceeb 100%);
+  border: 8px solid #8b7355;
+  border-radius: 4px;
+  box-shadow: 
+    inset 0 0 20px rgba(255, 255, 255, 0.5),
+    0 0 30px rgba(135, 206, 235, 0.3);
+}
+
+.window::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: #8b7355;
+  transform: translateY(-50%);
+}
+
+.window::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #8b7355;
+  transform: translateX(-50%);
+}
+
+.window-1 {
+  top: 100px;
+  left: 200px;
+}
+
+.window-2 {
+  top: 100px;
+  left: 500px;
+}
+
+.window-3 {
+  top: 100px;
+  right: 500px;
+}
+
+.window-4 {
+  top: 100px;
+  right: 200px;
+}
+
+/* Классная доска */
+.blackboard {
+  position: absolute;
+  top: 150px;
+  left: 50%;
+  transform: translateX(-50%) translateZ(-790px);
+  width: 800px;
+  height: 400px;
+  z-index: 2;
+}
+
+.blackboard-frame {
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  right: -15px;
+  bottom: -15px;
+  background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%);
+  border-radius: 8px;
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+.blackboard-surface {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, #2d4a3e 0%, #1a3328 100%);
+  border-radius: 4px;
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Боковые стены */
+.side-wall {
+  position: absolute;
+  top: 0;
+  height: 800px;
+  width: 2000px;
+  background: linear-gradient(90deg, #f0e0d0 0%, #e8d0c0 100%);
+  transform-origin: top center;
+}
+
+.side-wall.left {
+  left: 50%;
+  transform: translateX(-50%) translateZ(-600px) rotateY(60deg);
+  transform-origin: right center;
+  left: -1000px;
+}
+
+.side-wall.right {
+  right: 50%;
+  transform: translateX(50%) translateZ(-600px) rotateY(-60deg);
+  transform-origin: left center;
+  right: -1000px;
+}
+
+/* Потолок */
+.ceiling {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateZ(-600px) rotateX(90deg);
+  width: 3000px;
+  height: 2000px;
+  background: linear-gradient(180deg, #faf8f5 0%, #f0ebe5 100%);
+  transform-origin: top center;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.05);
+}
+
 .girl-container {
   position: relative;
   display: flex;
