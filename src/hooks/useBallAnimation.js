@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { gsap } from 'gsap';
 import { collisionConfig } from '../config/collisionConfig';
 
-export const useBallAnimation = (speedValue, setSpeedPaused) => {
+export const useBallAnimation = (speedValue, setSpeedPaused, currentLevel) => {
   const ballRef = useRef(null);
   const [ballAnimating, setBallAnimating] = useState(false);
   const ballPosition = useRef({ x: 0, y: 0 });
@@ -10,23 +10,26 @@ export const useBallAnimation = (speedValue, setSpeedPaused) => {
 
   const animateBall = () => {
     if (!ballRef.current || ballAnimating) return;
-    
+
     setBallAnimating(true);
     setSpeedPaused(true); // Останавливаем шкалу скорости
-    
+
     // Вычисляем длительность полёта на основе скорости (чем выше скорость, тем быстрее полёт)
     // Скорость 0 = 3 секунды, скорость 100 = 1 секунда
     const duration = 3 - (speedValue / 100) * 2.0;
-    
+
     // Случайное количество волн (2, 3 или 4)
     const waveCount = Math.floor(Math.random() * 3) + 2;
-    
+
     // Зеркальное отражение для 4 волн
     const isInverted = waveCount === 4;
-    
+
+    // Амплитуда зависит от уровня (во втором уровне шары летят выше)
+    const amplitude = currentLevel === 2 ? 200 : 150;
+
     // Сбрасываем позицию шара влево
     gsap.set(ballRef.current, { x: '-2000px', opacity: 1 });
-    
+
     // Анимация полёта шара слева направо с отслеживанием позиции
     animationRef.current = gsap.to(ballRef.current, {
       x: '2000px',
@@ -35,10 +38,10 @@ export const useBallAnimation = (speedValue, setSpeedPaused) => {
       onUpdate: function() {
         if (ballRef.current) {
           const progress = this.progress();
-          // Синусоидальное движение по Y (амплитуда 150px, случайное количество волн)
-          const yOffset = Math.sin(progress * Math.PI * waveCount) * 150 * (isInverted ? -1 : 1);
+          // Синусоидальное движение по Y (амплитуда зависит от уровня, случайное количество волн)
+          const yOffset = Math.sin(progress * Math.PI * waveCount) * amplitude * (isInverted ? -1 : 1);
           gsap.set(ballRef.current, { y: yOffset });
-          
+
           const rect = ballRef.current.getBoundingClientRect();
           ballPosition.current = {
             x: rect.left + rect.width / 2,

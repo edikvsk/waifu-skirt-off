@@ -10,7 +10,8 @@ const BaseballPlayer = forwardRef(({
   batTop = collisionConfig.batVisual.top,
   batLeft = collisionConfig.batVisual.left,
   batInitialAngle = collisionConfig.batVisual.initialAngle,
-  batSwingAngle = collisionConfig.batVisual.swingAngle
+  batSwingAngle = collisionConfig.batVisual.swingAngle,
+  currentLevel
 }, ref) => {
   const batRef = useRef(null);
   const playerRef = useRef(null);
@@ -123,7 +124,9 @@ const BaseballPlayer = forwardRef(({
         width: '770px',
         height: '1050px',
         zIndex: 1,
-        filter: 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
+        filter: currentLevel === 2
+          ? 'drop-shadow(0 0 12px rgba(255, 0, 102, 0.4)) drop-shadow(0 0 25px rgba(255, 0, 102, 0.2)) drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
+          : 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
       }}>
         <img 
           src={isHitting ? '/batter_hit_low.png' : '/batter_idle.png'}

@@ -55,7 +55,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
   // Custom hooks
   const { rotation, containerRef } = useSceneRotation(isBallSequenceActive);
   const { speedValue, setSpeedPaused, speedPaused } = useSpeedMeter();
-  const { ballRef, ballAnimating, animateBall, reverseBall, ballPosition } = useBallAnimation(fixedSpeedValue !== null ? fixedSpeedValue : speedValue, setSpeedPaused);
+  const { ballRef, ballAnimating, animateBall, reverseBall, ballPosition } = useBallAnimation(fixedSpeedValue !== null ? fixedSpeedValue : speedValue, setSpeedPaused, currentLevel);
   
   // Ref for baseball player swing function
   const baseballPlayerRef = useRef(null);
@@ -704,6 +704,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
             batLeft={batLeft}
             batInitialAngle={batInitialAngle}
             batSwingAngle={batSwingAngle}
+            currentLevel={currentLevel}
           />
 
           {/* Отладочная визуализация зоны коллизии */}

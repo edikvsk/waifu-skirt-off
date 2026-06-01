@@ -164,11 +164,13 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
         style={{
           position: 'relative',
           zIndex: 1,
-          maxHeight: currentLevel === 2 ? 'auto' : '550px',
-          height: currentLevel === 2 ? '632px' : 'auto',
+          maxHeight: currentLevel === 2 ? 'auto' : '500px',
+          height: currentLevel === 2 ? '500px' : 'auto',
           width: 'auto',
           display: 'block',
-          filter: 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
+          filter: currentLevel === 2 
+            ? 'drop-shadow(0 0 10px rgba(255, 0, 102, 0.4)) drop-shadow(0 0 20px rgba(255, 0, 102, 0.2)) drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
+            : 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
         }}
       />
       
@@ -183,7 +185,7 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
           top: '37%',
           left: '47%',
           transform: `translateX(-50%) scaleX(${currentLevel === 2 ? '1.35' : '1.05'})`,
-          maxHeight: '132px',
+          maxHeight: '120px',
           width: 'auto',
           zIndex: 2,
           transformOrigin: 'top center',
