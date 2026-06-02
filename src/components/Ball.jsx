@@ -2,11 +2,11 @@ import React, { forwardRef } from 'react';
 
 const Ball = forwardRef((props, ref) => {
   return (
-    <div 
+    <div
       ref={ref}
       style={{
         position: 'absolute',
-        top: '430px',
+        top: '370px',
         left: '0',
         width: '30px',
         height: '30px',

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useSceneRotation } from '../hooks/useSceneRotation';
 import { useSpeedMeter } from '../hooks/useSpeedMeter';
 import { useBallAnimation } from '../hooks/useBallAnimation';
+import { useItemAnimation } from '../hooks/useItemAnimation';
 import UIControls from './ui/UIControls';
 import Countdown from './ui/Countdown';
 import StarsRating from './ui/StarsRating';
@@ -12,6 +13,7 @@ import TrafficLight from './ui/TrafficLight';
 import Environment3D from './Environment3D';
 import Character from './Character';
 import Ball from './Ball';
+import Item from './Item';
 import BaseballPlayer from './BaseballPlayer';
 import { collisionConfig } from '../config/collisionConfig';
 import { getElementGamePosition, calculateDistance, checkRotatedRectCircleCollision } from '../utils/coordinateUtils';
@@ -42,6 +44,9 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
   const [animationsComplete, setAnimationsComplete] = useState(false);
   const [speedLevel, setSpeedLevel] = useState('low');
   const [animationTrigger, setAnimationTrigger] = useState(0);
+  const [hasEvaded, setHasEvaded] = useState(false);
+  const [showDefeatModal, setShowDefeatModal] = useState(false);
+  const [defeatTriggered, setDefeatTriggered] = useState(false);
 
   // Параметры невидимой биты (для отладки)
   const [batLength, setBatLength] = useState(collisionConfig.batVisual.length);
@@ -56,6 +61,8 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
   const { rotation, containerRef } = useSceneRotation(isBallSequenceActive);
   const { speedValue, setSpeedPaused, speedPaused } = useSpeedMeter();
   const { ballRef, ballAnimating, animateBall, reverseBall, ballPosition } = useBallAnimation(fixedSpeedValue !== null ? fixedSpeedValue : speedValue, setSpeedPaused, currentLevel);
+  const { itemRef, itemAnimating, animateItem, reverseItem, itemPosition } = useItemAnimation(fixedSpeedValue !== null ? fixedSpeedValue : speedValue, setSpeedPaused, currentLevel);
+  const [isItemLaunch, setIsItemLaunch] = useState(false);
   
   // Ref for baseball player swing function
   const baseballPlayerRef = useRef(null);
@@ -144,7 +151,16 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
 
   const handleCountdownComplete = () => {
     setIsCountdownActive(false);
-    animateBall();
+    setHasEvaded(false);
+    setDefeatTriggered(false);
+    // 100% шанс запуска предмета (для тестирования)
+    const shouldLaunchItem = true;
+    setIsItemLaunch(shouldLaunchItem);
+    if (shouldLaunchItem) {
+      animateItem();
+    } else {
+      animateBall();
+    }
     setTotalBallsLaunched(1);
   };
 
@@ -156,34 +172,45 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
       nextBallTimerRef.current = null;
     }
 
-    if (!ballAnimating && isBallSequenceActive && totalBallsLaunched > 0 && totalBallsLaunched < 10 && !isLaunchingNextBallRef.current && animationsComplete) {
-      console.log(`Запуск шара ${totalBallsLaunched + 1}`);
+    const isAnimating = ballAnimating || itemAnimating;
+
+    if (!isAnimating && isBallSequenceActive && totalBallsLaunched > 0 && totalBallsLaunched < 10 && !isLaunchingNextBallRef.current && animationsComplete) {
+      console.log(`Запуск объекта ${totalBallsLaunched + 1}`);
       isLaunchingNextBallRef.current = true;
-      
+
       // Гасим синий перед новым циклом
       setTrafficLightColor(null);
-      
+
       // Красный через 0.2 сек
       const redTimer = setTimeout(() => {
         setTrafficLightColor('red');
       }, 200);
-      
+
       // Жёлтый через 1.2 секунды
       const yellowTimer = setTimeout(() => {
         setTrafficLightColor('yellow');
       }, 1200);
-      
+
       // Синий через 2.2 секунды
       const blueTimer = setTimeout(() => {
         setTrafficLightColor('blue');
       }, 2200);
-      
-      // Запуск шара через 3.2 секунды (синий продолжает гореть)
+
+      // Запуск объекта через 3.2 секунды (синий продолжает гореть)
       nextBallTimerRef.current = setTimeout(() => {
         setCurrentBallNumber(totalBallsLaunched + 1);
         setFixedSpeedValue(speedValueRef.current);
         setSpeedPausedRef.current(true);
-        animateBallRef.current();
+        setHasEvaded(false);
+        setDefeatTriggered(false);
+        // 100% шанс запуска предмета (для тестирования)
+        const shouldLaunchItem = true;
+        setIsItemLaunch(shouldLaunchItem);
+        if (shouldLaunchItem) {
+          animateItem();
+        } else {
+          animateBallRef.current();
+        }
         setTotalBallsLaunched(prev => prev + 1);
         nextBallTimerRef.current = null;
         isLaunchingNextBallRef.current = false;
@@ -191,21 +218,21 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
         clearTimeout(yellowTimer);
         clearTimeout(blueTimer);
       }, 3200);
-    } else if (!ballAnimating && isBallSequenceActive && totalBallsLaunched >= 10) {
+    } else if (!isAnimating && isBallSequenceActive && totalBallsLaunched >= 10) {
       console.log('Последовательность завершена');
       setTrafficLightColor(null);
       // Вычисляем максимальный результат
       const maxResult = ballResults.length > 0 ? Math.max(...ballResults) : 0;
       console.log('Результаты:', ballResults, 'Максимальный:', maxResult);
-      
+
       // Сохраняем результат уровня
       onLevelComplete(currentLevel, maxResult);
-      
+
       // Показываем модальное окно с задержкой 2 секунды
       setTimeout(() => {
         setShowResultsModal(true);
       }, 2000);
-      
+
       // Последовательность завершена
       setIsBallSequenceActive(false);
       setSequenceCompleted(true);
@@ -219,7 +246,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
         clearTimeout(nextBallTimerRef.current);
       }
     };
-  }, [ballAnimating, isBallSequenceActive, totalBallsLaunched, animationsComplete]);
+  }, [ballAnimating, itemAnimating, isBallSequenceActive, totalBallsLaunched, animationsComplete]);
 
   // Сбрасываем фиксированную скорость после завершения анимации шара
   useEffect(() => {
@@ -311,6 +338,17 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
     }
   };
 
+  const handleEvasion = () => {
+    if (baseballPlayerRef.current && baseballPlayerRef.current.evasion) {
+      baseballPlayerRef.current.evasion();
+      setHasEvaded(true);
+      // Сбрасываем hasEvaded через 200ms (длительность уворота)
+      setTimeout(() => {
+        setHasEvaded(false);
+      }, 200);
+    }
+  };
+
   const checkCollision = () => {
     if (!baseballPlayerRef.current || !ballAnimating || !isSwingingRef.current) return;
 
@@ -382,14 +420,58 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
     }
   };
 
+  const checkItemCollision = () => {
+    if (!baseballPlayerRef.current || !itemAnimating || defeatTriggered) return;
+
+    const itemPos = itemPosition.current;
+    const playerPos = baseballPlayerRef.current.getPlayerPosition();
+
+    // Проверяем коллизию предмета с бейсболистом (по центру предмета)
+    const distance = Math.sqrt(
+      Math.pow(itemPos.x - playerPos.x, 2) +
+      Math.pow(itemPos.y - playerPos.y, 2)
+    );
+
+    // Радиус коллизии для предмета (уменьшен для более точного срабатывания)
+    const collisionRadius = 250;
+
+    console.log('Проверка коллизии предмета - Distance:', distance, 'Radius:', collisionRadius, 'itemX:', itemPos.x, 'playerX:', playerPos.x, 'itemY:', itemPos.y, 'playerY:', playerPos.y);
+
+    if (distance < collisionRadius) {
+      console.log('ПРЕДМЕТ ВРЕЗАЛСЯ В БЕЙСБОЛИСТА! Distance:', distance, 'hasEvaded:', hasEvaded);
+
+      setDefeatTriggered(true);
+
+      if (!hasEvaded) {
+        // Если не было уворота - поражение
+        console.log('НЕ БЫЛО УВОРОТА - ПОРАЖЕНИЕ');
+        setShowDefeatModal(true);
+        setIsBallSequenceActive(false);
+        reverseItem();
+      } else {
+        // Если был уворот - предмет просто улетает
+        console.log('БЫЛ УВОРОТ - предмет пролетел');
+      }
+    }
+  };
+
   // Непрерывная проверка коллизии во время полета шара
   useEffect(() => {
     if (!ballAnimating) return;
-    
+
     const checkInterval = setInterval(checkCollision, 16); // ~60fps
-    
+
     return () => clearInterval(checkInterval);
   }, [ballAnimating]);
+
+  // Непрерывная проверка коллизии предмета во время полёта
+  useEffect(() => {
+    if (!itemAnimating) return;
+
+    const checkInterval = setInterval(checkItemCollision, 16); // ~60fps
+
+    return () => clearInterval(checkInterval);
+  }, [itemAnimating, hasEvaded]);
 
   // Отладочное обновление координат
   useEffect(() => {
@@ -424,6 +506,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
         speedValue={speedValue}
         onWindLevelChange={setWindLevelAndAnimate}
         onAnimateBall={startBallWithCountdown}
+        onEvasion={handleEvasion}
       />
 
       {/* Обратный отсчёт */}
@@ -443,13 +526,58 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
 
       {/* Модальное окно с результатами */}
       {showResultsModal && (
-        <ResultsModal 
+        <ResultsModal
           maxStars={ballResults.length > 0 ? Math.max(...ballResults) : 0}
           onClose={() => {
             setShowResultsModal(false);
             onBackToMenu();
           }}
         />
+      )}
+
+      {/* Модальное окно поражения */}
+      {showDefeatModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '0',
+            left: '0',
+            width: '100%',
+            height: '100%',
+            background: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 2000
+          }}
+          onClick={() => {
+            setShowDefeatModal(false);
+            onBackToMenu();
+          }}
+        >
+          <div
+            style={{
+              background: 'rgba(30, 30, 30, 0.95)',
+              padding: '60px 80px',
+              borderRadius: '20px',
+              textAlign: 'center',
+              boxShadow: '0 0 50px rgba(255, 0, 0, 0.5)',
+              border: '2px solid rgba(255, 0, 0, 0.3)'
+            }}
+          >
+            <div
+              style={{
+                fontSize: '48px',
+                fontWeight: 'bold',
+                color: '#ff4444',
+                marginBottom: '20px',
+                fontFamily: 'PakenhamBl Italic, cursive'
+              }}
+            >
+              ПОРАЖЕНИЕ
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Кнопка отладочного режима */}
@@ -691,6 +819,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
             animationTrigger={animationTrigger}
           >
             <Ball ref={ballRef} />
+            <Item ref={itemRef} />
           </Character>
           
           {/* Бейсболист справа */}

@@ -10,7 +10,8 @@ const UIControls = ({
   sequenceCompleted,
   speedValue,
   onWindLevelChange,
-  onAnimateBall
+  onAnimateBall,
+  onEvasion
 }) => {
   const [isClicked, setIsClicked] = useState(false);
 
@@ -97,7 +98,26 @@ const UIControls = ({
         gap: '10px',
         zIndex: 1000
       }}>
-        <button 
+        <button
+          onClick={onEvasion}
+          style={{
+            padding: '12px 25px',
+            fontSize: '16px',
+            backgroundColor: '#ff6b6b',
+            color: 'white',
+            border: 'none',
+            borderRadius: '25px',
+            cursor: 'pointer',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+            fontWeight: 'bold',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseOver={(e) => e.target.style.backgroundColor = '#ff5252'}
+          onMouseOut={(e) => e.target.style.backgroundColor = '#ff6b6b'}
+        >
+          Уворот
+        </button>
+        <button
           onClick={() => onWindLevelChange(1)}
           style={{
             padding: '12px 25px',
@@ -114,7 +134,7 @@ const UIControls = ({
         >
           Ветер 1
         </button>
-        <button 
+        <button
           onClick={() => onWindLevelChange(2)}
           style={{
             padding: '12px 25px',
@@ -131,7 +151,7 @@ const UIControls = ({
         >
           Ветер 2
         </button>
-        <button 
+        <button
           onClick={() => onWindLevelChange(3)}
           style={{
             padding: '12px 25px',

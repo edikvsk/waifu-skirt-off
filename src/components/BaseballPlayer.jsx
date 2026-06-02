@@ -17,6 +17,14 @@ const BaseballPlayer = forwardRef(({
   const playerRef = useRef(null);
   const batPosition = useRef({ x: 0, y: 0, angle: 0 });
   const [isHitting, setIsHitting] = useState(false);
+  const [isEvading, setIsEvading] = useState(false);
+
+  const evasion = () => {
+    setIsEvading(true);
+    setTimeout(() => {
+      setIsEvading(false);
+    }, 200);
+  };
 
   const swingBat = () => {
     if (!batRef.current) return;
@@ -77,10 +85,21 @@ const BaseballPlayer = forwardRef(({
     };
   };
 
-  // Экспонируем метод swingBat и позицию биты через ref
+  const getPlayerPosition = () => {
+    if (!playerRef.current) return { x: 0, y: 0 };
+    const rect = playerRef.current.getBoundingClientRect();
+    return {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2
+    };
+  };
+
+  // Экспонируем метод swingBat, evasion, позицию биты и позицию игрока через ref
   useImperativeHandle(ref, () => ({
     swingBat,
-    getBatPosition: () => batPosition.current
+    evasion,
+    getBatPosition: () => batPosition.current,
+    getPlayerPosition
   }));
 
   // Контр-вращение бейсболиста для создания объёма
@@ -117,7 +136,7 @@ const BaseballPlayer = forwardRef(({
         filter: 'blur(12px)',
         zIndex: 0
       }} />
-      
+
       {/* Бейсболист (спрайты) */}
       <div style={{
         position: 'relative',
@@ -128,8 +147,8 @@ const BaseballPlayer = forwardRef(({
           ? 'drop-shadow(0 0 12px rgba(255, 0, 102, 0.4)) drop-shadow(0 0 25px rgba(255, 0, 102, 0.2)) drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
           : 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
       }}>
-        <img 
-          src={isHitting ? '/batter_hit_low.png' : '/batter_idle.png'}
+        <img
+          src={isEvading ? '/batter_evasion_1.png' : isHitting ? '/batter_hit_low.png' : '/batter_idle.png'}
           alt="Baseball Player"
           style={{
             width: '1000px',
