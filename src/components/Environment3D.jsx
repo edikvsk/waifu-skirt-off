@@ -84,9 +84,92 @@ const Environment3D = ({ currentLevel }) => {
         </div>
       )}
 
+      {/* Фон особняка - для третьего уровня */}
+      {isLevel3 && (
+        <div className="mansion-background">
+          {/* Задняя стена с камином */}
+          <div className="mansion-back-wall">
+            {/* Камин */}
+            <div className="mansion-fireplace">
+              <div className="fireplace-frame"></div>
+              <div className="fireplace-opening">
+                <div className="fireplace-fire">
+                  <div className="flame flame-1"></div>
+                  <div className="flame flame-2"></div>
+                  <div className="flame flame-3"></div>
+                </div>
+              </div>
+              <div className="fireplace-mantel"></div>
+            </div>
+            
+            {/* Картина над камином */}
+            <div className="mansion-painting">
+              <div className="painting-frame"></div>
+              <div className="painting-canvas"></div>
+            </div>
+            
+            {/* Окна с тяжёлыми шторами */}
+            <div className="mansion-window mansion-window-1">
+              <div className="mansion-curtain left"></div>
+              <div className="mansion-curtain right"></div>
+              <div className="mansion-curtain-tie left"></div>
+              <div className="mansion-curtain-tie right"></div>
+            </div>
+            <div className="mansion-window mansion-window-2">
+              <div className="mansion-curtain left"></div>
+              <div className="mansion-curtain right"></div>
+              <div className="mansion-curtain-tie left"></div>
+              <div className="mansion-curtain-tie right"></div>
+            </div>
+            
+            {/* Люстра */}
+            <div className="mansion-chandelier">
+              <div className="chandelier-chain"></div>
+              <div className="chandelier-body">
+                <div className="chandelier-arm arm-1"></div>
+                <div className="chandelier-arm arm-2"></div>
+                <div className="chandelier-arm arm-3"></div>
+                <div className="chandelier-arm arm-4"></div>
+                <div className="chandelier-arm arm-5"></div>
+                <div className="chandelier-arm arm-6"></div>
+                {/* Висящие кристаллы */}
+                <div className="chandelier-crystal c-1"></div>
+                <div className="chandelier-crystal c-2"></div>
+                <div className="chandelier-crystal c-3"></div>
+                <div className="chandelier-crystal c-4"></div>
+                <div className="chandelier-crystal c-5"></div>
+                <div className="chandelier-crystal c-6"></div>
+                <div className="chandelier-crystal c-7"></div>
+                <div className="chandelier-crystal c-8"></div>
+                <div className="chandelier-crystal c-9"></div>
+                <div className="chandelier-crystal c-10"></div>
+              </div>
+              <div className="chandelier-glow"></div>
+            </div>
+          </div>
+          
+          {/* Боковые стены с деревянными панелями */}
+          <div className="mansion-side-wall left">
+            <div className="wall-panel panel-1"></div>
+            <div className="wall-panel panel-2"></div>
+            <div className="wall-panel panel-3"></div>
+          </div>
+          <div className="mansion-side-wall right">
+            <div className="wall-panel panel-1"></div>
+            <div className="wall-panel panel-2"></div>
+            <div className="wall-panel panel-3"></div>
+          </div>
+          
+          {/* Потолок с лепниной */}
+          <div className="mansion-ceiling">
+            <div className="ceiling-molding"></div>
+          </div>
+        </div>
+      )}
+
       {/* 3D пол - стиль зависит от уровня */}
-      <div className={`floor-3d ${isJapaneseSchool ? 'floor-school' : isLoveHotel ? 'floor-love-hotel' : isLevel3 ? 'floor-love-hotel' : 'floor-default'}`}>
-        <div className={`floor-grid ${isJapaneseSchool ? 'grid-school' : isLoveHotel ? 'grid-love-hotel' : isLevel3 ? 'grid-love-hotel' : 'grid-default'}`}></div>
+      <div className={`floor-3d ${isJapaneseSchool ? 'floor-school' : isLoveHotel ? 'floor-love-hotel' : isLevel3 ? 'floor-mansion' : 'floor-default'}`}>
+        <div className={`floor-grid ${isJapaneseSchool ? 'grid-school' : isLoveHotel ? 'grid-love-hotel' : isLevel3 ? 'grid-mansion' : 'grid-default'}`}></div>
       </div>
     </>
   );
