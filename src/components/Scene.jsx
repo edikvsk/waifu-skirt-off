@@ -7,6 +7,7 @@ import UIControls from './ui/UIControls';
 import Countdown from './ui/Countdown';
 import StarsRating from './ui/StarsRating';
 import HitEffect from './ui/HitEffect';
+import PlayerHitEffect from './ui/PlayerHitEffect';
 import WindEffect from './ui/WindEffect';
 import ResultsModal from './ui/ResultsModal';
 import TrafficLight from './ui/TrafficLight';
@@ -47,6 +48,9 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
   const [hasEvaded, setHasEvaded] = useState(false);
   const [showDefeatModal, setShowDefeatModal] = useState(false);
   const [defeatTriggered, setDefeatTriggered] = useState(false);
+  const [playerHitEffectActive, setPlayerHitEffectActive] = useState(false);
+  const [playerHitPosition, setPlayerHitPosition] = useState(null);
+  const [collisionProcessed, setCollisionProcessed] = useState(false);
 
   // Параметры невидимой биты (для отладки)
   const [batLength, setBatLength] = useState(collisionConfig.batVisual.length);
@@ -61,7 +65,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
   const { rotation, containerRef } = useSceneRotation(isBallSequenceActive);
   const { speedValue, setSpeedPaused, speedPaused } = useSpeedMeter();
   const { ballRef, ballAnimating, animateBall, reverseBall, ballPosition } = useBallAnimation(fixedSpeedValue !== null ? fixedSpeedValue : speedValue, setSpeedPaused, currentLevel);
-  const { itemRef, itemAnimating, animateItem, reverseItem, itemPosition } = useItemAnimation(fixedSpeedValue !== null ? fixedSpeedValue : speedValue, setSpeedPaused, currentLevel);
+  const { itemRef, itemAnimating, animateItem, reverseItem, pauseItem, itemPosition } = useItemAnimation(fixedSpeedValue !== null ? fixedSpeedValue : speedValue, setSpeedPaused, currentLevel);
   const [isItemLaunch, setIsItemLaunch] = useState(false);
   
   // Ref for baseball player swing function
@@ -153,8 +157,9 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
     setIsCountdownActive(false);
     setHasEvaded(false);
     setDefeatTriggered(false);
-    // 100% шанс запуска предмета (для тестирования)
-    const shouldLaunchItem = true;
+    setCollisionProcessed(false);
+    // 25% шанс запуска предмета
+    const shouldLaunchItem = Math.random() < 0.25;
     setIsItemLaunch(shouldLaunchItem);
     if (shouldLaunchItem) {
       animateItem();
@@ -203,8 +208,9 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
         setSpeedPausedRef.current(true);
         setHasEvaded(false);
         setDefeatTriggered(false);
-        // 100% шанс запуска предмета (для тестирования)
-        const shouldLaunchItem = true;
+        setCollisionProcessed(false);
+        // 25% шанс запуска предмета
+        const shouldLaunchItem = Math.random() < 0.25;
         setIsItemLaunch(shouldLaunchItem);
         if (shouldLaunchItem) {
           animateItem();
@@ -285,6 +291,17 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
       return () => clearTimeout(timer);
     }
   }, [windEffectActive]);
+
+  // Скрываем эффект удара предмета в бейсболиста через 0.6 секунды
+  useEffect(() => {
+    if (playerHitEffectActive) {
+      const timer = setTimeout(() => {
+        setPlayerHitEffectActive(false);
+        setPlayerHitPosition(null);
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [playerHitEffectActive]);
 
   // Последовательное появление звёзд после окончания ветра
   useEffect(() => {
@@ -421,7 +438,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
   };
 
   const checkItemCollision = () => {
-    if (!baseballPlayerRef.current || !itemAnimating || defeatTriggered) return;
+    if (!baseballPlayerRef.current || !itemAnimating || defeatTriggered || collisionProcessed) return;
 
     const itemPos = itemPosition.current;
     const playerPos = baseballPlayerRef.current.getPlayerPosition();
@@ -441,13 +458,29 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
       console.log('ПРЕДМЕТ ВРЕЗАЛСЯ В БЕЙСБОЛИСТА! Distance:', distance, 'hasEvaded:', hasEvaded);
 
       setDefeatTriggered(true);
+      setCollisionProcessed(true);
 
       if (!hasEvaded) {
         // Если не было уворота - поражение
         console.log('НЕ БЫЛО УВОРОТА - ПОРАЖЕНИЕ');
-        setShowDefeatModal(true);
-        setIsBallSequenceActive(false);
-        reverseItem();
+        
+        // Останавливаем объект на месте при столкновении
+        pauseItem();
+        
+        // Показываем спрайт поражения бейсболиста
+        if (baseballPlayerRef.current && baseballPlayerRef.current.hitByItem) {
+          baseballPlayerRef.current.hitByItem();
+        }
+        
+        // Показываем эффект удара предмета в бейсболиста
+        setPlayerHitPosition({ x: playerPos.x, y: playerPos.y });
+        setPlayerHitEffectActive(true);
+        
+        // Задерживаем показ модального окна поражения на 600мс
+        setTimeout(() => {
+          setShowDefeatModal(true);
+          setIsBallSequenceActive(false);
+        }, 600);
       } else {
         // Если был уворот - предмет просто улетает
         console.log('БЫЛ УВОРОТ - предмет пролетел');
@@ -466,12 +499,12 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
 
   // Непрерывная проверка коллизии предмета во время полёта
   useEffect(() => {
-    if (!itemAnimating) return;
+    if (!itemAnimating || collisionProcessed) return;
 
     const checkInterval = setInterval(checkItemCollision, 16); // ~60fps
 
     return () => clearInterval(checkInterval);
-  }, [itemAnimating, hasEvaded]);
+  }, [itemAnimating, hasEvaded, collisionProcessed]);
 
   // Отладочное обновление координат
   useEffect(() => {
@@ -520,6 +553,9 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
 
       {/* Эффект удара */}
       <HitEffect isActive={hitEffectActive} position={hitPosition} />
+
+      {/* Эффект удара предмета в бейсболиста */}
+      <PlayerHitEffect isActive={playerHitEffectActive} position={playerHitPosition} />
 
       {/* Эффект ветра */}
       <WindEffect isActive={windEffectActive} windLevel={windLevel} />
@@ -819,7 +855,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
             animationTrigger={animationTrigger}
           >
             <Ball ref={ballRef} />
-            <Item ref={itemRef} />
+            <Item ref={itemRef} currentLevel={currentLevel} />
           </Character>
           
           {/* Бейсболист справа */}

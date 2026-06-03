@@ -1,16 +1,27 @@
 import React, { forwardRef } from 'react';
 
-const Item = forwardRef((props, ref) => {
+const Item = forwardRef(({ currentLevel }, ref) => {
+  const getItemImage = () => {
+    switch (currentLevel) {
+      case 2:
+        return '/item_2.png';
+      case 3:
+        return '/item_3.png';
+      default:
+        return '/item_1.png';
+    }
+  };
+
   return (
     <div
       ref={ref}
       style={{
         position: 'absolute',
-        top: '370px',
-        left: '0',
+        top: '270px',
+        left: '400px',
         width: '300px',
         height: '300px',
-        backgroundImage: 'url(/item_1.png)',
+        backgroundImage: `url(${getItemImage()})`,
         backgroundSize: 'contain',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center',

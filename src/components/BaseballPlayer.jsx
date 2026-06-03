@@ -18,12 +18,17 @@ const BaseballPlayer = forwardRef(({
   const batPosition = useRef({ x: 0, y: 0, angle: 0 });
   const [isHitting, setIsHitting] = useState(false);
   const [isEvading, setIsEvading] = useState(false);
+  const [isHitByItem, setIsHitByItem] = useState(false);
 
   const evasion = () => {
     setIsEvading(true);
     setTimeout(() => {
       setIsEvading(false);
     }, 200);
+  };
+
+  const hitByItem = () => {
+    setIsHitByItem(true);
   };
 
   const swingBat = () => {
@@ -94,10 +99,11 @@ const BaseballPlayer = forwardRef(({
     };
   };
 
-  // Экспонируем метод swingBat, evasion, позицию биты и позицию игрока через ref
+  // Экспонируем метод swingBat, evasion, hitByItem, позицию биты и позицию игрока через ref
   useImperativeHandle(ref, () => ({
     swingBat,
     evasion,
+    hitByItem,
     getBatPosition: () => batPosition.current,
     getPlayerPosition
   }));
@@ -148,7 +154,7 @@ const BaseballPlayer = forwardRef(({
           : 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
       }}>
         <img
-          src={isEvading ? '/batter_evasion_1.png' : isHitting ? '/batter_hit_low.png' : '/batter_idle.png'}
+          src={isHitByItem ? '/batter_fail_1.png' : isEvading ? '/batter_evasion_1.png' : isHitting ? '/batter_hit_low.png' : '/batter_idle.png'}
           alt="Baseball Player"
           style={{
             width: '1000px',

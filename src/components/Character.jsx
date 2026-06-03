@@ -150,7 +150,7 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
       case 2:
         return { top: '37%', left: '47%', scaleX: '1.35', maxHeight: '120px' };
       case 3:
-        return { top: '37%', left: '40%', scaleX: '0.83', maxHeight: '138px' };
+        return { top: '37%', left: '40%', scaleX: '0.83', maxHeight: '117px' };
       default:
         return { top: '37%', left: '47%', scaleX: '1.05', maxHeight: '120px' };
     }
@@ -183,7 +183,7 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
           position: 'relative',
           zIndex: 1,
           maxHeight: currentLevel === 2 ? 'auto' : currentLevel === 3 ? 'auto' : '500px',
-          height: currentLevel === 2 ? '500px' : currentLevel === 3 ? '575px' : 'auto',
+          height: currentLevel === 2 ? '500px' : currentLevel === 3 ? '517px' : 'auto',
           width: 'auto',
           display: 'block',
           filter: currentLevel === 2
