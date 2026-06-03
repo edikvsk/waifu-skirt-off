@@ -25,7 +25,7 @@ export const useBallAnimation = (speedValue, setSpeedPaused, currentLevel) => {
     const isInverted = waveCount === 4;
 
     // Амплитуда зависит от уровня (во втором уровне шары летят выше)
-    const amplitude = currentLevel === 2 ? 200 : 150;
+    const amplitude = currentLevel === 2 || currentLevel === 4 ? 200 : 150;
 
     // Сбрасываем позицию шара влево
     gsap.set(ballRef.current, { x: '-2000px', opacity: 1 });
@@ -40,7 +40,9 @@ export const useBallAnimation = (speedValue, setSpeedPaused, currentLevel) => {
           const progress = this.progress();
           // Синусоидальное движение по Y (амплитуда зависит от уровня, случайное количество волн)
           const yOffset = Math.sin(progress * Math.PI * waveCount) * amplitude * (isInverted ? -1 : 1);
-          gsap.set(ballRef.current, { y: yOffset });
+          // Базовое смещение вниз для уровня 4
+          const baseOffset = currentLevel === 4 ? 50 : 0;
+          gsap.set(ballRef.current, { y: yOffset + baseOffset });
 
           const rect = ballRef.current.getBoundingClientRect();
           ballPosition.current = {

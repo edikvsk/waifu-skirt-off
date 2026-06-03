@@ -11,7 +11,8 @@ const UIControls = ({
   speedValue,
   onWindLevelChange,
   onAnimateBall,
-  onEvasion
+  onEvasion,
+  onTestSkirtFall
 }) => {
   const [isClicked, setIsClicked] = useState(false);
 
@@ -117,6 +118,27 @@ const UIControls = ({
         >
           Уворот
         </button>
+        {onTestSkirtFall && (
+          <button
+            onClick={onTestSkirtFall}
+            style={{
+              padding: '12px 25px',
+              fontSize: '16px',
+              backgroundColor: '#9b59b6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '25px',
+              cursor: 'pointer',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+              fontWeight: 'bold',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#8e44ad'}
+            onMouseOut={(e) => e.target.style.backgroundColor = '#9b59b6'}
+          >
+            Тест юбки
+          </button>
+        )}
         <button
           onClick={() => onWindLevelChange(1)}
           style={{

@@ -51,6 +51,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
   const [playerHitEffectActive, setPlayerHitEffectActive] = useState(false);
   const [playerHitPosition, setPlayerHitPosition] = useState(null);
   const [collisionProcessed, setCollisionProcessed] = useState(false);
+  const [gamePaused, setGamePaused] = useState(false);
 
   // Параметры невидимой биты (для отладки)
   const [batLength, setBatLength] = useState(collisionConfig.batVisual.length);
@@ -115,6 +116,20 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
     girlImg.onload = () => setImageLoaded(true);
   }, []);
 
+  // Обработчик правой кнопки мыши для уклона
+  useEffect(() => {
+    const handleRightClick = (e) => {
+      e.preventDefault();
+      handleEvasion();
+    };
+
+    document.addEventListener('contextmenu', handleRightClick);
+
+    return () => {
+      document.removeEventListener('contextmenu', handleRightClick);
+    };
+  }, []);
+
   const toggleAnimation = () => {
     setIsAnimating(!isAnimating);
   };
@@ -127,13 +142,13 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
   };
 
   const startBallWithCountdown = () => {
-    if (isBallSequenceActive) return;
+    if (isBallSequenceActive || gamePaused) return;
     setIsBallSequenceActive(true);
     setSequenceCompleted(false);
     setCurrentBallNumber(1);
     setTotalBallsLaunched(0);
     setBallResults([]); // Сбрасываем результаты перед новой последовательностью
-    
+
     // Запускаем светофор перед первым броском
     setTrafficLightColor('red');
     
@@ -179,7 +194,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
 
     const isAnimating = ballAnimating || itemAnimating;
 
-    if (!isAnimating && isBallSequenceActive && totalBallsLaunched > 0 && totalBallsLaunched < 10 && !isLaunchingNextBallRef.current && animationsComplete) {
+    if (!isAnimating && isBallSequenceActive && totalBallsLaunched > 0 && totalBallsLaunched < 10 && !isLaunchingNextBallRef.current && animationsComplete && !gamePaused) {
       console.log(`Запуск объекта ${totalBallsLaunched + 1}`);
       isLaunchingNextBallRef.current = true;
 
@@ -366,6 +381,27 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
     }
   };
 
+  const handleTestSkirtFall = () => {
+    if (currentLevel === 4) {
+      setSpeedLevel('high');
+      setIsAnimating(true);
+    }
+  };
+
+  const handleSkirtSequenceStart = () => {
+    if (currentLevel === 4) {
+      setGamePaused(true);
+    }
+  };
+
+  const handleSkirtSequenceEnd = () => {
+    if (currentLevel === 4) {
+      setGamePaused(false);
+      setSpeedLevel('low');
+      setIsAnimating(false);
+    }
+  };
+
   const checkCollision = () => {
     if (!baseballPlayerRef.current || !ballAnimating || !isSwingingRef.current) return;
 
@@ -540,6 +576,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
         onWindLevelChange={setWindLevelAndAnimate}
         onAnimateBall={startBallWithCountdown}
         onEvasion={handleEvasion}
+        onTestSkirtFall={currentLevel === 4 ? handleTestSkirtFall : null}
       />
 
       {/* Обратный отсчёт */}
@@ -853,6 +890,8 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
             speedLevel={speedLevel}
             currentLevel={currentLevel}
             animationTrigger={animationTrigger}
+            onSkirtSequenceStart={handleSkirtSequenceStart}
+            onSkirtSequenceEnd={handleSkirtSequenceEnd}
           >
             <Ball ref={ballRef} />
             <Item ref={itemRef} currentLevel={currentLevel} />

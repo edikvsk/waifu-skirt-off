@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Environment3D = ({ currentLevel }) => {
-  const isJapaneseSchool = currentLevel === 1;
+  const isJapaneseSchool = currentLevel === 1 || currentLevel === 4;
   const isLoveHotel = currentLevel === 2;
   const isLevel3 = currentLevel === 3;
 

@@ -23,7 +23,7 @@ export const useItemAnimation = (speedValue, setSpeedPaused, currentLevel) => {
     const isInverted = waveCount === 4;
 
     // Амплитуда зависит от уровня
-    const amplitude = currentLevel === 2 ? 200 : 150;
+    const amplitude = currentLevel === 2 || currentLevel === 4 ? 200 : 150;
 
     // Сбрасываем позицию предмета влево
     gsap.set(itemRef.current, { x: '-2000px', opacity: 1, rotation: 0 });

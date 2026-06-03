@@ -1,14 +1,106 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 
-const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotation, speedLevel, currentLevel, animationTrigger }) => {
+const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotation, speedLevel, currentLevel, animationTrigger, onSkirtSequenceStart, onSkirtSequenceEnd }) => {
   const skirtRef = useRef(null);
   const timelineRef = useRef(null);
   const characterRef = useRef(null);
+  const [isSurprise, setIsSurprise] = useState(false);
+  const [skirtDropped, setSkirtDropped] = useState(false);
 
   useEffect(() => {
     if (!imageLoaded || !skirtRef.current) return;
 
+    // Эксклюзивная анимация для уровня 4 - сползание юбки вниз без деформации
+    if (currentLevel === 4) {
+      // Если юбка уже упала, не анимируем снова
+      if (skirtDropped) {
+        // Устанавливаем текущую позицию юбки в опущенное состояние
+        const currentSlideAmount = 250; // Максимальное падение
+        gsap.set(skirtRef.current, { y: currentSlideAmount });
+        return;
+      }
+
+      // Определяем смещение вниз в зависимости от скорости шара
+      const slideAmount = speedLevel === 'high' ? 250 : speedLevel === 'normal' ? 20 : 10;
+      const slideDuration = speedLevel === 'high' ? 0.8 : speedLevel === 'normal' ? 1.0 : 1.2;
+
+      const tl = gsap.timeline({ repeat: 0, paused: !isAnimating });
+
+      // При high скорости - полная последовательность с паузой игры
+      if (speedLevel === 'high' && isAnimating) {
+        if (onSkirtSequenceStart) onSkirtSequenceStart();
+
+        // 1. Падение юбки
+        tl.to(skirtRef.current, {
+          y: slideAmount,
+          duration: slideDuration,
+          ease: 'power1.inOut',
+          onComplete: () => {
+            setSkirtDropped(true);
+          }
+        }, 0);
+
+        // 2. Смена на surprise спрайт после падения
+        tl.call(() => {
+          setIsSurprise(true);
+        }, null, slideDuration);
+
+        // 3. Удержание surprise спрайта 1.5 секунды
+        tl.to({}, { duration: 1.5 }, slideDuration);
+
+        // 4. Уведомление о завершении последовательности (surprise остается)
+        tl.call(() => {
+          if (onSkirtSequenceEnd) onSkirtSequenceEnd();
+        }, null, slideDuration + 1.5);
+      } else {
+        // Для normal и slow - простое сползание
+        tl.to(skirtRef.current, {
+          y: slideAmount,
+          duration: slideDuration,
+          ease: 'power1.inOut',
+          onComplete: () => {
+            setSkirtDropped(true);
+          }
+        }, 0);
+      }
+
+      timelineRef.current = tl;
+
+      // Минимальная волна clip-path для уровня 4
+      const animateClipPath = () => {
+        if (!isAnimating || !skirtRef.current) {
+          requestAnimationFrame(animateClipPath);
+          return;
+        }
+
+        const time = Date.now() * 0.001;
+        const wave1 = Math.sin(time * 2) * 1; // Уменьшенная амплитуда
+        const wave2 = Math.sin(time * 3 + 1) * 0.5;
+        const wave3 = Math.sin(time * 1.5 + 2) * 1;
+
+        const clipPath = `polygon(
+          0% 0%,
+          100% 0%,
+          ${100 + wave2}% 25%,
+          ${100 + wave3}% 100%,
+          ${0 + wave1}% 100%,
+          ${0 + wave1}% 25%
+        )`;
+
+        skirtRef.current.style.clipPath = clipPath;
+
+        requestAnimationFrame(animateClipPath);
+      };
+
+      animateClipPath();
+
+      return () => {
+        tl.kill();
+      };
+    }
+
+    // Стандартная анимация для уровней 1-3
     // Определяем параметры анимации в зависимости от уровня ветра
     const windLevels = {
       1: { scaleY: 0.85, rotation: 1.5, skewX: 1.5, y: 2, duration: 1.2 },
@@ -96,7 +188,7 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
     return () => {
       tl.kill();
     };
-  }, [imageLoaded, windLevel, isAnimating, animationTrigger]);
+  }, [imageLoaded, windLevel, isAnimating, animationTrigger, currentLevel, speedLevel]);
 
   // Управление воспроизведением анимации
   useEffect(() => {
@@ -105,9 +197,13 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
         timelineRef.current.play();
       } else {
         timelineRef.current.pause();
+        // Сбрасываем surprise только если не уровень 4
+        if (currentLevel !== 4) {
+          setIsSurprise(false);
+        }
       }
     }
-  }, [isAnimating]);
+  }, [isAnimating, currentLevel]);
 
   // Контр-вращение персонажа для создания объёма (billboarding эффект)
   useEffect(() => {
@@ -122,7 +218,10 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
 
   // Определяем спрайт в зависимости от уровня скорости и уровня игры
   const getGirlSprite = () => {
-    const suffix = currentLevel === 2 ? '_2' : currentLevel === 3 ? '_3' : '';
+    if (isSurprise && currentLevel === 4) {
+      return '/layer_girl_surprise_4.png';
+    }
+    const suffix = currentLevel === 2 ? '_2' : currentLevel === 3 ? '_3' : currentLevel === 4 ? '_4' : '';
     switch (speedLevel) {
       case 'high':
         return `/layer_girl_fast${suffix}.png`;
@@ -131,6 +230,7 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
       default:
         if (currentLevel === 2) return '/layer_girl_slow_2.png';
         if (currentLevel === 3) return '/layer_girl_slow_3.png';
+        if (currentLevel === 4) return '/layer_girl_slow_4.png';
         return '/layer_girl.png';
     }
   };
@@ -139,6 +239,7 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
   const getSkirtSprite = () => {
     if (currentLevel === 2) return '/layer_skirt_2.png';
     if (currentLevel === 3) return '/layer_skirt_3.png';
+    if (currentLevel === 4) return '/layer_skirt_4.png';
     return '/layer_skirt.png';
   };
 
@@ -151,6 +252,8 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
         return { top: '37%', left: '47%', scaleX: '1.35', maxHeight: '120px' };
       case 3:
         return { top: '37%', left: '40%', scaleX: '0.83', maxHeight: '117px' };
+      case 4:
+        return { top: '31%', left: '47%', scaleX: '1.25', maxHeight: '150px' };
       default:
         return { top: '37%', left: '47%', scaleX: '1.05', maxHeight: '120px' };
     }
@@ -182,8 +285,8 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
         style={{
           position: 'relative',
           zIndex: 1,
-          maxHeight: currentLevel === 2 ? 'auto' : currentLevel === 3 ? 'auto' : '500px',
-          height: currentLevel === 2 ? '500px' : currentLevel === 3 ? '517px' : 'auto',
+          maxHeight: currentLevel === 2 ? 'auto' : currentLevel === 3 ? 'auto' : currentLevel === 4 ? 'auto' : '500px',
+          height: currentLevel === 2 ? '500px' : currentLevel === 3 ? '517px' : currentLevel === 4 ? '500px' : 'auto',
           width: 'auto',
           display: 'block',
           filter: currentLevel === 2

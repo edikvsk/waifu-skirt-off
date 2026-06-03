@@ -7,6 +7,8 @@ const Item = forwardRef(({ currentLevel }, ref) => {
         return '/item_2.png';
       case 3:
         return '/item_3.png';
+      case 4:
+        return '/item_3.png';
       default:
         return '/item_1.png';
     }
