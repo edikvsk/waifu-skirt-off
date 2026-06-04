@@ -278,7 +278,7 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
       <img
         src={getGirlSprite()}
         alt="Character"
-        className="base-image"
+        className={`base-image ${currentLevel === 4 ? 'sun-glow-character' : ''}`}
         style={{
           position: 'relative',
           zIndex: 1,
@@ -288,6 +288,8 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
           display: 'block',
           filter: currentLevel === 2
             ? 'drop-shadow(0 0 10px rgba(255, 0, 102, 0.4)) drop-shadow(0 0 20px rgba(255, 0, 102, 0.2)) drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
+            : currentLevel === 4
+            ? 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
             : 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
         }}
       />

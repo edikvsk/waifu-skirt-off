@@ -8,7 +8,7 @@ const Item = forwardRef(({ currentLevel }, ref) => {
       case 3:
         return '/item_3.png';
       case 4:
-        return '/item_3.png';
+        return '/item_4.png';
       default:
         return '/item_1.png';
     }
@@ -21,8 +21,8 @@ const Item = forwardRef(({ currentLevel }, ref) => {
         position: 'absolute',
         top: '270px',
         left: '400px',
-        width: '300px',
-        height: '300px',
+        width: currentLevel === 4 ? '150px' : '300px',
+        height: currentLevel === 4 ? '150px' : '300px',
         backgroundImage: `url(${getItemImage()})`,
         backgroundSize: 'contain',
         backgroundRepeat: 'no-repeat',
@@ -30,7 +30,7 @@ const Item = forwardRef(({ currentLevel }, ref) => {
         zIndex: 3,
         opacity: 0,
         pointerEvents: 'none',
-        transform: 'translateY(-135px)'
+        transform: currentLevel === 4 ? 'translateY(-67.5px)' : 'translateY(-135px)'
       }}
     />
   );

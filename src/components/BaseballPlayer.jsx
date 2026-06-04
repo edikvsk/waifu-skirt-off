@@ -144,13 +144,15 @@ const BaseballPlayer = forwardRef(({
       }} />
 
       {/* Бейсболист (спрайты) */}
-      <div style={{
+      <div className={currentLevel === 4 ? 'sun-glow-baseball' : ''} style={{
         position: 'relative',
         width: '770px',
         height: '1050px',
         zIndex: 1,
         filter: currentLevel === 2
           ? 'drop-shadow(0 0 12px rgba(255, 0, 102, 0.4)) drop-shadow(0 0 25px rgba(255, 0, 102, 0.2)) drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
+          : currentLevel === 4
+          ? 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
           : 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
       }}>
         <img

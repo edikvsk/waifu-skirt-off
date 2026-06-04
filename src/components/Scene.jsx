@@ -389,14 +389,11 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
   };
 
   const handleSkirtSequenceStart = () => {
-    if (currentLevel === 4) {
-      setGamePaused(true);
-    }
+    // Не ставим паузу игры, чтобы шары продолжали лететь
   };
 
   const handleSkirtSequenceEnd = () => {
     if (currentLevel === 4) {
-      setGamePaused(false);
       setSpeedLevel('low');
       // Не сбрасываем isAnimating, чтобы игра продолжилась
     }

@@ -1658,3 +1658,424 @@ body {
 .grid-mansion {
   background-image: none;
 }
+
+/* Фон пляжа */
+.beach-background {
+  position: absolute;
+  top: -800px;
+  left: 0;
+  width: 100%;
+  height: calc(100% + 800px);
+  transform-style: preserve-3d;
+  z-index: 1;
+}
+
+/* Небо пляжа */
+.beach-sky {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateZ(-800px);
+  width: 6000px;
+  height: 1500px;
+  background: linear-gradient(180deg, #2C1810 0%, #4A235A 10%, #6C3483 20%, #8E44AD 30%, #9B59B6 40%, #FF6B6B 50%, #FF8E53 60%, #FFB347 75%, #FFD93D 90%, #FFF9E6 100%);
+  box-shadow: inset 0 0 100px rgba(255, 255, 255, 0.3);
+}
+
+/* Солнце наполовину за горизонтом */
+.beach-sunset-sun {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 200px;
+}
+
+.sunset-sun-body {
+  position: absolute;
+  bottom: -75px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle,
+    #FFFFFF 0%,
+    #FFFACD 10%,
+    #FFD700 25%,
+    #FFA500 40%,
+    #FF8C00 55%,
+    #FF6347 70%,
+    #FF4500 85%,
+    rgba(255, 69, 0, 0.5) 95%,
+    rgba(255, 69, 0, 0) 100%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 30px #FFFFFF,
+    0 0 60px #FFD700,
+    0 0 90px #FFA500,
+    0 0 120px #FF8C00,
+    0 0 150px rgba(255, 140, 0, 0.6),
+    0 0 180px rgba(255, 99, 71, 0.4),
+    0 0 210px rgba(255, 69, 0, 0.3),
+    0 0 240px rgba(255, 69, 0, 0.2),
+    0 0 270px rgba(255, 69, 0, 0.1);
+  animation: sunsetPulse 6s ease-in-out infinite;
+  filter: blur(1px);
+}
+
+.sunset-sun-body::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 180%;
+  height: 180%;
+  background: radial-gradient(circle,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 215, 0, 0.4) 30%,
+    rgba(255, 165, 0, 0.2) 50%,
+    transparent 70%);
+  filter: blur(20px);
+  animation: innerGlow 4s ease-in-out infinite alternate;
+}
+
+.sunset-sun-body::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 250%;
+  height: 250%;
+  background: radial-gradient(circle,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 215, 0, 0.2) 20%,
+    rgba(255, 165, 0, 0.1) 40%,
+    transparent 60%);
+  filter: blur(40px);
+  animation: outerGlow 5s ease-in-out infinite alternate;
+}
+
+.sunset-sun-glow {
+  position: absolute;
+  bottom: -130px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 215, 0, 0.6) 20%,
+    rgba(255, 165, 0, 0.4) 40%,
+    rgba(255, 140, 0, 0.2) 60%,
+    transparent 80%);
+  filter: blur(30px);
+  animation: sunsetGlow 5s ease-in-out infinite alternate;
+}
+
+@keyframes sunsetPulse {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(-50%) scale(1.05);
+    opacity: 0.95;
+  }
+}
+
+@keyframes innerGlow {
+  0% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+@keyframes outerGlow {
+  0% {
+    opacity: 0.4;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0.7;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+@keyframes sunsetGlow {
+  0% {
+    opacity: 0.6;
+    transform: translateX(-50%) scale(1);
+  }
+  100% {
+    opacity: 0.9;
+    transform: translateX(-50%) scale(1.15);
+  }
+}
+
+/* Море */
+.beach-sea {
+  position: absolute;
+  bottom: 200px;
+  left: 50%;
+  transform: translateX(-50%) translateZ(-750px);
+  width: 6000px;
+  height: 300px;
+  background: linear-gradient(180deg,
+    #1E90FF 0%,
+    #00BFFF 30%,
+    #87CEEB 60%,
+    #B0E0E6 100%);
+  box-shadow:
+    inset 0 0 50px rgba(255, 255, 255, 0.2),
+    0 0 30px rgba(30, 144, 255, 0.3);
+  overflow: hidden;
+}
+
+/* Солнечная дорожка */
+.sun-reflection {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 100%;
+  pointer-events: none;
+}
+
+.reflection-ray {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 20px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 215, 0, 0.6) 20%,
+    rgba(255, 165, 0, 0.8) 50%,
+    rgba(255, 215, 0, 0.6) 80%,
+    transparent 100%);
+  filter: blur(3px);
+  animation: reflectionShimmer 3s ease-in-out infinite;
+}
+
+.reflection-ray::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 30%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.4) 70%,
+    transparent 100%);
+  mix-blend-mode: overlay;
+}
+
+.ray-1 {
+  top: 20px;
+  width: 280px;
+  animation-delay: 0s;
+  animation-duration: 2.5s;
+}
+
+.ray-2 {
+  top: 60px;
+  width: 260px;
+  animation-delay: -0.5s;
+  animation-duration: 2.8s;
+}
+
+.ray-3 {
+  top: 100px;
+  width: 240px;
+  animation-delay: -1s;
+  animation-duration: 3s;
+}
+
+.ray-4 {
+  top: 140px;
+  width: 220px;
+  animation-delay: -1.5s;
+  animation-duration: 3.2s;
+}
+
+.ray-5 {
+  top: 180px;
+  width: 200px;
+  animation-delay: -2s;
+  animation-duration: 3.5s;
+}
+
+@keyframes reflectionShimmer {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translateX(-50%) scaleX(1);
+  }
+  25% {
+    opacity: 0.9;
+    transform: translateX(-50%) scaleX(1.1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateX(-50%) scaleX(0.95);
+  }
+  75% {
+    opacity: 0.85;
+    transform: translateX(-50%) scaleX(1.05);
+  }
+}
+
+/* Волны */
+.wave {
+  position: absolute;
+  width: 200%;
+  height: 60px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.5) 15%,
+    rgba(255, 255, 255, 0.8) 30%,
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(255, 255, 255, 0.8) 70%,
+    rgba(255, 255, 255, 0.5) 85%,
+    transparent 100%);
+  box-shadow:
+    0 0 20px rgba(255, 255, 255, 0.4),
+    0 0 40px rgba(135, 206, 250, 0.3);
+  animation: waveMove 4s ease-in-out infinite;
+}
+
+.wave::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(135, 206, 250, 0.3) 50%,
+    rgba(30, 144, 255, 0.2) 100%);
+  border-radius: 50%;
+  filter: blur(2px);
+}
+
+.wave-1 {
+  bottom: 0;
+  animation-delay: 0s;
+  animation-duration: 4s;
+  height: 70px;
+}
+
+.wave-2 {
+  bottom: 25px;
+  animation-delay: -1.3s;
+  animation-duration: 4.5s;
+  opacity: 0.85;
+  height: 55px;
+}
+
+.wave-3 {
+  bottom: 50px;
+  animation-delay: -2.6s;
+  animation-duration: 5s;
+  opacity: 0.7;
+  height: 45px;
+}
+
+@keyframes waveMove {
+  0% {
+    transform: translateX(-50%) scaleY(1) translateY(0);
+  }
+  25% {
+    transform: translateX(-25%) scaleY(1.3) translateY(-5px);
+  }
+  50% {
+    transform: translateX(0%) scaleY(1) translateY(0);
+  }
+  75% {
+    transform: translateX(25%) scaleY(0.7) translateY(5px);
+  }
+  100% {
+    transform: translateX(50%) scaleY(1) translateY(0);
+  }
+}
+
+/* Пляж с песком */
+.beach-sand {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateZ(-700px);
+  width: 6000px;
+  height: 250px;
+  background: linear-gradient(180deg,
+    #F5E6C8 0%,
+    #E8D4B8 30%,
+    #DBC2A8 60%,
+    #CEB098 100%);
+  box-shadow:
+    inset 0 0 50px rgba(0, 0, 0, 0.1),
+    0 0 30px rgba(245, 230, 200, 0.2);
+}
+
+/* Песчаные дюны */
+.sand-dune {
+  position: absolute;
+  background: linear-gradient(180deg,
+    #E8D4B8 0%,
+    #DBC2A8 50%,
+    #CEB098 100%);
+  border-radius: 50% 50% 0 0;
+  box-shadow:
+    0 5px 15px rgba(0, 0, 0, 0.2),
+    inset 0 10px 20px rgba(255, 255, 255, 0.3);
+}
+
+.dune-1 {
+  bottom: 0;
+  left: 300px;
+  width: 400px;
+  height: 80px;
+}
+
+.dune-2 {
+  bottom: 0;
+  right: 300px;
+  width: 350px;
+  height: 60px;
+}
+
+/* Пол пляжа */
+.floor-beach {
+  background: linear-gradient(180deg,
+    #F5E6C8 0%,
+    #E8D4B8 30%,
+    #DBC2A8 60%,
+    #CEB098 100%);
+  box-shadow:
+    inset 0 0 100px rgba(0, 0, 0, 0.1),
+    0 0 50px rgba(245, 230, 200, 0.2);
+}
+
+/* Сетка пляжа - отключена */
+.grid-beach {
+  background-image: none;
+}
+
+/* Свечение персонажей от солнца на пляже */
+.sun-glow-character {
+  filter: drop-shadow(0 0 8px rgba(255, 200, 100, 0.3)) drop-shadow(0 0 15px rgba(255, 165, 0, 0.2));
+}
+
+.sun-glow-baseball {
+  filter: drop-shadow(0 0 10px rgba(255, 200, 100, 0.35)) drop-shadow(0 0 20px rgba(255, 165, 0, 0.25)) drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
+}

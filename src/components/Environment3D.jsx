@@ -1,9 +1,10 @@
 import React from 'react';
 
 const Environment3D = ({ currentLevel }) => {
-  const isJapaneseSchool = currentLevel === 1 || currentLevel === 4;
+  const isJapaneseSchool = currentLevel === 1;
   const isLoveHotel = currentLevel === 2;
   const isLevel3 = currentLevel === 3;
+  const isBeach = currentLevel === 4;
 
   return (
     <>
@@ -101,13 +102,13 @@ const Environment3D = ({ currentLevel }) => {
               </div>
               <div className="fireplace-mantel"></div>
             </div>
-            
+
             {/* Картина над камином */}
             <div className="mansion-painting">
               <div className="painting-frame"></div>
               <div className="painting-canvas"></div>
             </div>
-            
+
             {/* Окна с тяжёлыми шторами */}
             <div className="mansion-window mansion-window-1">
               <div className="mansion-curtain left"></div>
@@ -121,7 +122,7 @@ const Environment3D = ({ currentLevel }) => {
               <div className="mansion-curtain-tie left"></div>
               <div className="mansion-curtain-tie right"></div>
             </div>
-            
+
             {/* Люстра */}
             <div className="mansion-chandelier">
               <div className="chandelier-chain"></div>
@@ -147,7 +148,7 @@ const Environment3D = ({ currentLevel }) => {
               <div className="chandelier-glow"></div>
             </div>
           </div>
-          
+
           {/* Боковые стены с деревянными панелями */}
           <div className="mansion-side-wall left">
             <div className="wall-panel panel-1"></div>
@@ -159,7 +160,7 @@ const Environment3D = ({ currentLevel }) => {
             <div className="wall-panel panel-2"></div>
             <div className="wall-panel panel-3"></div>
           </div>
-          
+
           {/* Потолок с лепниной */}
           <div className="mansion-ceiling">
             <div className="ceiling-molding"></div>
@@ -167,9 +168,46 @@ const Environment3D = ({ currentLevel }) => {
         </div>
       )}
 
+      {/* Фон пляжа - для четвёртого уровня */}
+      {isBeach && (
+        <div className="beach-background">
+          {/* Небо с градиентом */}
+          <div className="beach-sky">
+            {/* Солнце наполовину за горизонтом */}
+            <div className="beach-sunset-sun">
+              <div className="sunset-sun-body"></div>
+              <div className="sunset-sun-glow"></div>
+            </div>
+          </div>
+
+          {/* Море */}
+          <div className="beach-sea">
+            {/* Солнечная дорожка */}
+            <div className="sun-reflection">
+              <div className="reflection-ray ray-1"></div>
+              <div className="reflection-ray ray-2"></div>
+              <div className="reflection-ray ray-3"></div>
+              <div className="reflection-ray ray-4"></div>
+              <div className="reflection-ray ray-5"></div>
+            </div>
+            {/* Волны */}
+            <div className="wave wave-1"></div>
+            <div className="wave wave-2"></div>
+            <div className="wave wave-3"></div>
+          </div>
+
+          {/* Пляж с песком */}
+          <div className="beach-sand">
+            {/* Песчаные дюны */}
+            <div className="sand-dune dune-1"></div>
+            <div className="sand-dune dune-2"></div>
+          </div>
+        </div>
+      )}
+
       {/* 3D пол - стиль зависит от уровня */}
-      <div className={`floor-3d ${isJapaneseSchool ? 'floor-school' : isLoveHotel ? 'floor-love-hotel' : isLevel3 ? 'floor-mansion' : 'floor-default'}`}>
-        <div className={`floor-grid ${isJapaneseSchool ? 'grid-school' : isLoveHotel ? 'grid-love-hotel' : isLevel3 ? 'grid-mansion' : 'grid-default'}`}></div>
+      <div className={`floor-3d ${isJapaneseSchool ? 'floor-school' : isLoveHotel ? 'floor-love-hotel' : isLevel3 ? 'floor-mansion' : isBeach ? 'floor-beach' : 'floor-default'}`}>
+        <div className={`floor-grid ${isJapaneseSchool ? 'grid-school' : isLoveHotel ? 'grid-love-hotel' : isLevel3 ? 'grid-mansion' : isBeach ? 'grid-beach' : 'grid-default'}`}></div>
       </div>
     </>
   );
