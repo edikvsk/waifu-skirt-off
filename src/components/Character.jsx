@@ -54,14 +54,11 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
           if (onSkirtSequenceEnd) onSkirtSequenceEnd();
         }, null, slideDuration + 1.5);
       } else {
-        // Для normal и slow - простое сползание
+        // Для normal и slow - простое сползание без фиксации
         tl.to(skirtRef.current, {
           y: slideAmount,
           duration: slideDuration,
-          ease: 'power1.inOut',
-          onComplete: () => {
-            setSkirtDropped(true);
-          }
+          ease: 'power1.inOut'
         }, 0);
       }
 

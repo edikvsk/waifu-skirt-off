@@ -398,7 +398,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
     if (currentLevel === 4) {
       setGamePaused(false);
       setSpeedLevel('low');
-      setIsAnimating(false);
+      // Не сбрасываем isAnimating, чтобы игра продолжилась
     }
   };
 
