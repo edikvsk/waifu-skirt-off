@@ -218,7 +218,7 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
     if (isSurprise && currentLevel === 4) {
       return '/layer_girl_surprise_4.png';
     }
-    const suffix = currentLevel === 2 ? '_2' : currentLevel === 3 ? '_3' : currentLevel === 4 ? '_4' : '';
+    const suffix = currentLevel === 2 ? '_2' : currentLevel === 3 ? '_3' : currentLevel === 4 ? '_4' : currentLevel === 5 ? '_5' : '';
     switch (speedLevel) {
       case 'high':
         return `/layer_girl_fast${suffix}.png`;
@@ -228,6 +228,7 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
         if (currentLevel === 2) return '/layer_girl_slow_2.png';
         if (currentLevel === 3) return '/layer_girl_slow_3.png';
         if (currentLevel === 4) return '/layer_girl_slow_4.png';
+        if (currentLevel === 5) return '/layer_girl_slow_5.png';
         return '/layer_girl.png';
     }
   };
@@ -237,6 +238,7 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
     if (currentLevel === 2) return '/layer_skirt_2.png';
     if (currentLevel === 3) return '/layer_skirt_3.png';
     if (currentLevel === 4) return '/layer_skirt_4.png';
+    if (currentLevel === 5) return '/layer_skirt_5.png';
     return '/layer_skirt.png';
   };
 
@@ -251,6 +253,8 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
         return { top: '37%', left: '40%', scaleX: '0.83', maxHeight: '117px' };
       case 4:
         return { top: '31%', left: '47%', scaleX: '1.25', maxHeight: '150px' };
+      case 5:
+        return { top: '31%', left: '58%', scaleX: '1.30', maxHeight: '150px' };
       default:
         return { top: '37%', left: '47%', scaleX: '1.05', maxHeight: '120px' };
     }
@@ -282,13 +286,15 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
         style={{
           position: 'relative',
           zIndex: 1,
-          maxHeight: currentLevel === 2 ? 'auto' : currentLevel === 3 ? 'auto' : currentLevel === 4 ? 'auto' : '500px',
-          height: currentLevel === 2 ? '500px' : currentLevel === 3 ? '517px' : currentLevel === 4 ? '500px' : 'auto',
+          maxHeight: currentLevel === 2 ? 'auto' : currentLevel === 3 ? 'auto' : currentLevel === 4 ? 'auto' : currentLevel === 5 ? 'auto' : '500px',
+          height: currentLevel === 2 ? '500px' : currentLevel === 3 ? '517px' : currentLevel === 4 ? '500px' : currentLevel === 5 ? '500px' : 'auto',
           width: 'auto',
           display: 'block',
           filter: currentLevel === 2
             ? 'drop-shadow(0 0 10px rgba(255, 0, 102, 0.4)) drop-shadow(0 0 20px rgba(255, 0, 102, 0.2)) drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
             : currentLevel === 4
+            ? 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
+            : currentLevel === 5
             ? 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
             : 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
         }}
