@@ -1,12 +1,96 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import { useSpriteAnimation } from '../hooks/useSpriteAnimation';
 
-const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotation, speedLevel, currentLevel, animationTrigger, onSkirtSequenceStart, onSkirtSequenceEnd }) => {
+const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotation, speedLevel, currentLevel, animationTrigger, onSkirtSequenceStart, onSkirtSequenceEnd, isBallSequenceActive, sequenceCompleted, animScale = 1, animPosX = 0, animPosY = 0, onAnimationPlayingChange }) => {
   const skirtRef = useRef(null);
   const timelineRef = useRef(null);
   const characterRef = useRef(null);
   const [isSurprise, setIsSurprise] = useState(false);
   const [skirtDropped, setSkirtDropped] = useState(false);
+
+  // Хук для спрайтовой анимации (только для уровня 1)
+  const { currentFrame, isPlaying: isSpritePlaying, isLoaded: isSpriteLoaded, frames } = useSpriteAnimation(
+    currentLevel,
+    'walk',
+    'ball',
+    isBallSequenceActive
+  );
+
+  // Анимация движения по X для уровня 1
+  const animMoveRef = useRef(null);
+  const [currentAnimX, setCurrentAnimX] = useState(animPosX);
+  const [showAnimation, setShowAnimation] = useState(false);
+  const [animOpacity, setAnimOpacity] = useState(1);
+  const [baseOpacity, setBaseOpacity] = useState(1);
+
+  useEffect(() => {
+    if (currentLevel === 1 && isSpritePlaying && isSpriteLoaded && frames.length > 0) {
+      setShowAnimation(true);
+      setAnimOpacity(1);
+      setBaseOpacity(0);
+      setCurrentAnimX(-1200); // Начальная позиция
+
+      // Уведомляем Scene что анимация началась
+      if (onAnimationPlayingChange) {
+        onAnimationPlayingChange(true);
+      }
+
+      // Запускаем анимацию движения от -1200 до -200
+      animMoveRef.current = gsap.to(
+        { x: -1200 },
+        {
+          x: -200,
+          duration: 3,
+          ease: 'none',
+          onUpdate: function() {
+            setCurrentAnimX(this.targets()[0].x);
+          },
+          onComplete: () => {
+            // Очень короткий fade для естественности без эффекта призрака
+            gsap.to({}, {
+              duration: 0.1,
+              onUpdate: function() {
+                const progress = this.progress();
+                setAnimOpacity(1 - progress);
+                setBaseOpacity(progress);
+              },
+              onComplete: () => {
+                setShowAnimation(false);
+                setAnimOpacity(1);
+                setBaseOpacity(1);
+                // Уведомляем Scene что анимация закончилась
+                if (onAnimationPlayingChange) {
+                  onAnimationPlayingChange(false);
+                }
+              }
+            });
+          }
+        }
+      );
+    } else {
+      // Сбрасываем позицию когда анимация не играет
+      if (animMoveRef.current) {
+        gsap.killTweensOf(animMoveRef.current);
+        animMoveRef.current = null;
+      }
+      setCurrentAnimX(animPosX);
+      setShowAnimation(false);
+      setAnimOpacity(1);
+      // Если кнопка BALL видна (isBallSequenceActive = false) и последовательность не завершена, скрываем спрайт
+      setBaseOpacity(currentLevel === 1 && !isBallSequenceActive && !sequenceCompleted ? 0 : 1);
+      // Уведомляем Scene что анимация не играет
+      if (onAnimationPlayingChange) {
+        onAnimationPlayingChange(false);
+      }
+    }
+
+    return () => {
+      if (animMoveRef.current) {
+        gsap.killTweensOf(animMoveRef.current);
+      }
+    };
+  }, [isSpritePlaying, isSpriteLoaded, frames.length, currentLevel, isBallSequenceActive, onAnimationPlayingChange]);
 
   useEffect(() => {
     if (!imageLoaded || !skirtRef.current) return;
@@ -273,7 +357,12 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
       }}
     >
       {/* Тень под персонажем */}
-      <div className="girl-shadow"></div>
+      <div
+        className="girl-shadow"
+        style={{
+          opacity: currentLevel === 1 ? baseOpacity : 1
+        }}
+      ></div>
       
       {/* Дочерние элементы (объекты, шары и т.д.) */}
       {children}
@@ -290,6 +379,7 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
           height: currentLevel === 2 ? '500px' : currentLevel === 3 ? '517px' : currentLevel === 4 ? '500px' : currentLevel === 5 ? '525px' : 'auto',
           width: 'auto',
           display: 'block',
+          opacity: currentLevel === 1 ? baseOpacity : 1,
           filter: currentLevel === 2
             ? 'drop-shadow(0 0 10px rgba(255, 0, 102, 0.4)) drop-shadow(0 0 20px rgba(255, 0, 102, 0.2)) drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
             : currentLevel === 4
@@ -299,7 +389,27 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
             : 'drop-shadow(2px 4px 6px rgba(0,0,0,0.3))'
         }}
       />
-      
+
+      {/* Спрайтовая анимация поверх основного спрайта (только для уровня 1) */}
+      {currentLevel === 1 && showAnimation && isSpriteLoaded && frames.length > 0 && (
+        <img
+          src={frames[currentFrame]}
+          alt="Animation"
+          style={{
+            position: 'absolute',
+            top: -72,
+            left: currentAnimX,
+            zIndex: 1.5,
+            maxHeight: currentLevel === 2 ? 'auto' : currentLevel === 3 ? 'auto' : currentLevel === 4 ? 'auto' : currentLevel === 5 ? 'auto' : '500px',
+            height: currentLevel === 2 ? '500px' : currentLevel === 3 ? '517px' : currentLevel === 4 ? '500px' : currentLevel === 5 ? '525px' : 'auto',
+            width: 'auto',
+            pointerEvents: 'none',
+            opacity: animOpacity,
+            transform: `scale(1.42)`
+          }}
+        />
+      )}
+
       {/* Юбка поверх персонажа - позиционируется на талии */}
       <img
         ref={skirtRef}
@@ -316,6 +426,7 @@ const Character = ({ imageLoaded, isAnimating, windLevel, children, sceneRotatio
           zIndex: 2,
           transformOrigin: 'top center',
           pointerEvents: 'none',
+          opacity: currentLevel === 1 ? baseOpacity : 1,
           filter: 'drop-shadow(1px 2px 3px rgba(0,0,0,0.2))'
         }}
       />

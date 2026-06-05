@@ -61,6 +61,12 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
   const [batInitialAngle, setBatInitialAngle] = useState(collisionConfig.batVisual.initialAngle);
   const [batSwingAngle, setBatSwingAngle] = useState(collisionConfig.batVisual.swingAngle);
   const [savedConfig, setSavedConfig] = useState('');
+
+  // Параметры анимации (для отладки)
+  const [animScale, setAnimScale] = useState(1);
+  const [animPosX, setAnimPosX] = useState(0);
+  const [animPosY, setAnimPosY] = useState(0);
+  const [isAnimationPlaying, setIsAnimationPlaying] = useState(false);
   
   // Custom hooks
   const { rotation, containerRef } = useSceneRotation(isBallSequenceActive);
@@ -149,23 +155,30 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
     setTotalBallsLaunched(0);
     setBallResults([]); // Сбрасываем результаты перед новой последовательностью
 
-    // Запускаем светофор перед первым броском
-    setTrafficLightColor('red');
-    
-    // Жёлтый через 1 секунду
-    setTimeout(() => {
-      setTrafficLightColor('yellow');
-    }, 1000);
-    
-    // Синий через 2 секунды
-    setTimeout(() => {
-      setTrafficLightColor('blue');
-    }, 2000);
-    
-    // Первый шар с обратным отсчётом
-    setFixedSpeedValue(speedValue);
-    setSpeedPaused(true);
-    setIsCountdownActive(true);
+    // Для уровня 1 сначала запускаем анимацию, потом countdown
+    if (currentLevel === 1) {
+      // Анимация запустится автоматически через isBallSequenceActive
+      // После окончания анимации (onAnimationPlayingChange(false)) запустим countdown
+    } else {
+      // Для остальных уровней - обычная логика
+      // Запускаем светофор перед первым броском
+      setTrafficLightColor('red');
+
+      // Жёлтый через 1 секунду
+      setTimeout(() => {
+        setTrafficLightColor('yellow');
+      }, 1000);
+
+      // Синий через 2 секунды
+      setTimeout(() => {
+        setTrafficLightColor('blue');
+      }, 2000);
+
+      // Первый шар с обратным отсчётом
+      setFixedSpeedValue(speedValue);
+      setSpeedPaused(true);
+      setIsCountdownActive(true);
+    }
   };
 
   const handleCountdownComplete = () => {
@@ -184,6 +197,29 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
     setTotalBallsLaunched(1);
   };
 
+  // Запуск countdown после окончания анимации для уровня 1
+  useEffect(() => {
+    if (currentLevel === 1 && isBallSequenceActive && !isAnimationPlaying && totalBallsLaunched === 0) {
+      // Анимация закончилась, запускаем светофор и countdown
+      setTrafficLightColor('red');
+
+      // Жёлтый через 1 секунду
+      setTimeout(() => {
+        setTrafficLightColor('yellow');
+      }, 1000);
+
+      // Синий через 2 секунды
+      setTimeout(() => {
+        setTrafficLightColor('blue');
+      }, 2000);
+
+      // Первый шар с обратным отсчётом
+      setFixedSpeedValue(speedValue);
+      setSpeedPaused(true);
+      setIsCountdownActive(true);
+    }
+  }, [isAnimationPlaying, isBallSequenceActive, currentLevel, totalBallsLaunched, speedValue]);
+
   // Запуск следующего шара после завершения анимации
   useEffect(() => {
     // Очищаем предыдущий таймер если есть
@@ -194,7 +230,7 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
 
     const isAnimating = ballAnimating || itemAnimating;
 
-    if (!isAnimating && isBallSequenceActive && totalBallsLaunched > 0 && totalBallsLaunched < 10 && !isLaunchingNextBallRef.current && animationsComplete && !gamePaused) {
+    if (!isAnimating && isBallSequenceActive && totalBallsLaunched > 0 && totalBallsLaunched < 10 && !isLaunchingNextBallRef.current && animationsComplete && !gamePaused && !isAnimationPlaying) {
       console.log(`Запуск объекта ${totalBallsLaunched + 1}`);
       isLaunchingNextBallRef.current = true;
 
@@ -837,6 +873,53 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
                 />
               </div>
             )}
+
+            {/* Ползунки настройки анимации */}
+            <div style={{ borderTop: '1px solid #00ff00', paddingTop: '10px', marginBottom: '10px' }}>
+              <div style={{ marginBottom: '10px', fontWeight: 'bold', fontSize: '13px' }}>
+                🎬 НАСТРОЙКА АНИМАЦИИ
+              </div>
+
+              {/* Scale */}
+              <label style={{ display: 'block', marginBottom: '4px' }}>
+                Scale: {animScale.toFixed(2)}
+              </label>
+              <input
+                type="range"
+                min="0.5"
+                max="2"
+                step="0.01"
+                value={animScale}
+                onChange={(e) => setAnimScale(Number(e.target.value))}
+                style={{ width: '100%', marginBottom: '10px' }}
+              />
+
+              {/* Position X */}
+              <label style={{ display: 'block', marginBottom: '4px' }}>
+                Pos X: {animPosX}px
+              </label>
+              <input
+                type="range"
+                min="-1000"
+                max="200"
+                value={animPosX}
+                onChange={(e) => setAnimPosX(Number(e.target.value))}
+                style={{ width: '100%', marginBottom: '10px' }}
+              />
+
+              {/* Position Y */}
+              <label style={{ display: 'block', marginBottom: '4px' }}>
+                Pos Y: {animPosY}px
+              </label>
+              <input
+                type="range"
+                min="-200"
+                max="200"
+                value={animPosY}
+                onChange={(e) => setAnimPosY(Number(e.target.value))}
+                style={{ width: '100%', marginBottom: '10px' }}
+              />
+            </div>
           </div>
         </div>
       )}
@@ -889,6 +972,12 @@ const Scene = ({ onBackToMenu, onLevelComplete, currentLevel }) => {
             animationTrigger={animationTrigger}
             onSkirtSequenceStart={handleSkirtSequenceStart}
             onSkirtSequenceEnd={handleSkirtSequenceEnd}
+            isBallSequenceActive={isBallSequenceActive}
+            sequenceCompleted={sequenceCompleted}
+            animScale={animScale}
+            animPosX={animPosX}
+            animPosY={animPosY}
+            onAnimationPlayingChange={setIsAnimationPlaying}
           >
             <Ball ref={ballRef} />
             <Item ref={itemRef} currentLevel={currentLevel} />
